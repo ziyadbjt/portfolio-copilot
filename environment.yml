@@ -1,0 +1,19 @@
+name: portfolio-copilot
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pandas
+  - numpy
+  - scipy
+  - matplotlib
+  - pyyaml
+  - pyarrow
+  - openpyxl
+  - jinja2
+  - pytest
+  - ipykernel
+  - pip
+  - pip:
+      - yfinance
+      - pyportfolioopt
