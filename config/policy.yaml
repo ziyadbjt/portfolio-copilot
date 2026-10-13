@@ -1,0 +1,44 @@
+# Politique d'investissement : source de vérité de l'outil.
+# Tous les poids et seuils sont en fraction (0.20 = 20 %).
+# Les valeurs marquées "proposition" sont des choix par défaut à revoir.
+
+base_currency: EUR
+horizon_years: 5
+universe_regions: [Europe, US]
+
+allocation:
+  core_target: 0.80
+  satellite_target: 0.20
+  satellite_max: 0.25            # proposition : marge de 5 pts au-dessus de la cible
+  satellite_themes: [IA, Energie]
+
+limits:
+  max_line_weight: 0.10          # proposition : une ligne du cœur ne dépasse pas 10 %
+  max_satellite_line_weight: 0.05  # proposition : une ligne satellite ne dépasse pas 5 %
+  max_sector_weight: 0.30        # proposition
+  max_country_weight: 0.50       # proposition : limite de fait le poids des US
+  max_foreign_currency_weight: 0.50  # proposition : part hors EUR (risque EUR/USD)
+
+risk:
+  max_drawdown: 0.20             # perte max tolérée depuis le plus haut
+  mc_breach_probability_max: 0.10  # proba max de dépasser max_drawdown en Monte Carlo
+  mc_horizon_years: 5
+  mc_n_simulations: 10000
+  var_confidence: 0.95           # niveau pour VaR et CVaR
+  stress_scenarios:              # fenêtres historiques (du plus haut au plus bas du marché)
+    crise_2008: {start: 2007-10-09, end: 2009-03-09}
+    covid_mars_2020: {start: 2020-02-19, end: 2020-03-23}
+    inflation_2022: {start: 2022-01-03, end: 2022-10-12}
+
+core_style:
+  min_dividend_yield: 0.02       # proposition : rendement min pour entrer dans le cœur
+  max_payout_ratio: 0.80         # proposition : au-delà, dividende jugé peu soutenable
+
+exclusions:
+  # Industries Yahoo Finance exclues (tabac, alcool, jeux d'argent)
+  industries:
+    - Tobacco
+    - Beverages - Brewers
+    - Beverages - Wineries & Distilleries
+    - Gambling
+    - Resorts & Casinos
