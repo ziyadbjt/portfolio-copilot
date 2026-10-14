@@ -10,6 +10,8 @@ from __future__ import annotations
 import datetime as dt
 from dataclasses import dataclass
 from pathlib import Path
+from types import MappingProxyType
+from typing import Mapping
 
 import yaml
 
@@ -25,7 +27,7 @@ class Allocation:
     core_target: float
     satellite_target: float
     satellite_max: float
-    satellite_themes: tuple[str, ...]
+    satellite_themes: Mapping[str, tuple[str, ...]]   # thème -> industries Yahoo
 
 
 @dataclass(frozen=True)
@@ -61,6 +63,25 @@ class CoreStyle:
 
 
 @dataclass(frozen=True)
+class Screening:
+    history_years: int
+    volatility_years: int
+    dividend_years: int
+    dividend_cut_tolerance: float
+    special_dividend_multiple: float
+    max_dividend_cuts: int
+    core_shortlist_size: int
+    satellite_shortlist_size: int
+    shortlist_max_per_sector: int
+    core_score_weights: Mapping[str, float]
+    satellite_score_weights: Mapping[str, float]
+
+
+CORE_SCORE_CRITERIA = {"dividend_yield", "payout_ratio", "dividend_growth", "volatility"}
+SATELLITE_SCORE_CRITERIA = {"volatility", "market_cap"}
+
+
+@dataclass(frozen=True)
 class Policy:
     base_currency: str
     horizon_years: int
@@ -69,6 +90,7 @@ class Policy:
     limits: Limits
     risk: RiskRules
     core_style: CoreStyle
+    screening: Screening
     excluded_industries: tuple[str, ...]
 
 
@@ -92,6 +114,7 @@ def parse_policy(raw: dict) -> Policy:
     risk = _section(raw, "risk")
     style = _section(raw, "core_style")
     excl = _section(raw, "exclusions")
+    scr = _section(raw, "screening")
 
     policy = Policy(
         base_currency=str(_get(raw, "base_currency")),
@@ -101,7 +124,7 @@ def parse_policy(raw: dict) -> Policy:
             core_target=_fraction(alloc, "core_target"),
             satellite_target=_fraction(alloc, "satellite_target"),
             satellite_max=_fraction(alloc, "satellite_max"),
-            satellite_themes=tuple(_get(alloc, "satellite_themes")),
+            satellite_themes=_themes(_section(alloc, "satellite_themes")),
         ),
         limits=Limits(
             max_line_weight=_fraction(lim, "max_line_weight"),
@@ -122,6 +145,20 @@ def parse_policy(raw: dict) -> Policy:
             min_dividend_yield=_fraction(style, "min_dividend_yield"),
             max_payout_ratio=_fraction(style, "max_payout_ratio"),
         ),
+        screening=Screening(
+            history_years=_positive_int(scr, "history_years"),
+            volatility_years=_positive_int(scr, "volatility_years"),
+            dividend_years=_positive_int(scr, "dividend_years"),
+            dividend_cut_tolerance=_fraction(scr, "dividend_cut_tolerance"),
+            special_dividend_multiple=_multiple(scr, "special_dividend_multiple"),
+            max_dividend_cuts=_non_negative_int(scr, "max_dividend_cuts"),
+            core_shortlist_size=_positive_int(scr, "core_shortlist_size"),
+            satellite_shortlist_size=_positive_int(scr, "satellite_shortlist_size"),
+            shortlist_max_per_sector=_positive_int(scr, "shortlist_max_per_sector"),
+            core_score_weights=_weights(scr, "core_score_weights", CORE_SCORE_CRITERIA),
+            satellite_score_weights=_weights(
+                scr, "satellite_score_weights", SATELLITE_SCORE_CRITERIA),
+        ),
         excluded_industries=tuple(_get(excl, "industries")),
     )
     _check_consistency(policy)
@@ -139,6 +176,19 @@ def _check_consistency(p: Policy) -> None:
         raise PolicyError("max_line_weight ne peut pas dépasser max_sector_weight.")
     if lim.max_satellite_line_weight > a.satellite_max:
         raise PolicyError("max_satellite_line_weight ne peut pas dépasser satellite_max.")
+    s = p.screening
+    # La short-list doit permettre d'investir chaque poche sans dépasser le poids max par ligne
+    if s.core_shortlist_size * lim.max_line_weight < a.core_target - 1e-9:
+        raise PolicyError("core_shortlist_size trop petit pour investir le cœur "
+                          "avec max_line_weight.")
+    if s.satellite_shortlist_size * lim.max_satellite_line_weight < a.satellite_target - 1e-9:
+        raise PolicyError("satellite_shortlist_size trop petit pour investir le satellite "
+                          "avec max_satellite_line_weight.")
+    if max(s.volatility_years, s.dividend_years + 1) > s.history_years:
+        raise PolicyError("history_years doit couvrir volatility_years et dividend_years + 1.")
+    themed = [i for industries in a.satellite_themes.values() for i in industries]
+    if set(themed) & set(p.excluded_industries):
+        raise PolicyError("Une industrie ne peut pas être à la fois satellite et exclue.")
     if not 0.5 <= p.risk.var_confidence < 1:
         raise PolicyError("var_confidence doit être entre 0.5 et 1 (ex. 0.95).")
 
@@ -172,6 +222,42 @@ def _positive_int(d: dict, key: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
         raise PolicyError(f"{key} doit être un entier positif, reçu {value!r}.")
     return value
+
+
+def _multiple(d: dict, key: str) -> float:
+    value = _get(d, key)
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 1:
+        raise PolicyError(f"{key} doit être un nombre supérieur à 1, reçu {value!r}.")
+    return float(value)
+
+
+def _non_negative_int(d: dict, key: str) -> int:
+    value = _get(d, key)
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise PolicyError(f"{key} doit être un entier positif ou nul, reçu {value!r}.")
+    return value
+
+
+def _themes(raw: dict) -> Mapping[str, tuple[str, ...]]:
+    if not raw:
+        raise PolicyError("satellite_themes doit contenir au moins un thème.")
+    for theme, industries in raw.items():
+        if not isinstance(industries, list) or not industries:
+            raise PolicyError(f"Le thème {theme} doit lister au moins une industrie.")
+    # MappingProxyType : dictionnaire en lecture seule, frozen=True ne protège pas le contenu
+    return MappingProxyType({theme: tuple(ind) for theme, ind in raw.items()})
+
+
+def _weights(d: dict, key: str, allowed: set[str]) -> Mapping[str, float]:
+    raw = _section(d, key)
+    unknown = set(raw) - allowed
+    if unknown:
+        raise PolicyError(f"{key} : critères inconnus {sorted(unknown)} "
+                          f"(autorisés : {sorted(allowed)}).")
+    weights = {k: _fraction(raw, k) for k in raw}
+    if abs(sum(weights.values()) - 1.0) > 1e-9:
+        raise PolicyError(f"Les poids de {key} doivent faire 1.")
+    return MappingProxyType(weights)
 
 
 def _scenarios(raw: dict) -> tuple[StressScenario, ...]:

@@ -150,3 +150,27 @@ def test_load_market_data_end_to_end(tmp_path, monkeypatch):
     assert md.dividends["ULVR.L"].sum() == pytest.approx(0.40 * 1.2)
     assert md.currencies == {"TTE.PA": "EUR", "MSFT": "USD", "ULVR.L": "GBP"}
     assert md.suspicious.empty
+
+
+def test_retries_then_succeeds(monkeypatch):
+    monkeypatch.setattr(data.time, "sleep", lambda s: None)
+    calls = []
+
+    def flaky():
+        calls.append(1)
+        if len(calls) < 3:
+            raise TimeoutError("réseau")
+        return "ok"
+
+    assert data._with_retries(flaky, "test") == "ok"
+    assert len(calls) == 3
+
+
+def test_retries_exhausted_becomes_data_error(monkeypatch):
+    monkeypatch.setattr(data.time, "sleep", lambda s: None)
+
+    def always_down():
+        raise TimeoutError("réseau")
+
+    with pytest.raises(DataError, match="3 essais"):
+        data._with_retries(always_down, "Historique X")

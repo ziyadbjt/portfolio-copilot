@@ -1,0 +1,272 @@
+ticker,name,index,country,sector,industry,currency
+ADS.DE,adidas AG N,Euro Stoxx 50,Germany,Consumer Cyclical,Footwear & Accessories,EUR
+ADYEN.AS,ADYEN,Euro Stoxx 50,Netherlands,Technology,Software - Infrastructure,EUR
+AD.AS,KONINKLIJKE AHOLD DELHAIZE N.V.,Euro Stoxx 50,Netherlands,Consumer Defensive,Grocery Stores,EUR
+AI.PA,AIR LIQUIDE,Euro Stoxx 50,France,Basic Materials,Specialty Chemicals,EUR
+AIR.PA,AIRBUS SE,Euro Stoxx 50,Netherlands,Industrials,Aerospace & Defense,EUR
+ALV.DE,Allianz SE v,Euro Stoxx 50,Germany,Financial Services,Insurance - Diversified,EUR
+ABI.BR,AB INBEV,Euro Stoxx 50,Belgium,Consumer Defensive,Beverages - Brewers,EUR
+ARGX.BR,ARGENX SE,Euro Stoxx 50,Netherlands,Healthcare,Biotechnology,EUR
+ASML.AS,ASML HOLDING,Euro Stoxx 50,Netherlands,Technology,Semiconductor Equipment & Materials,EUR
+CS.PA,AXA,Euro Stoxx 50,France,Financial Services,Insurance - Diversified,EUR
+BAS.DE,BASF SE N,Euro Stoxx 50,Germany,Basic Materials,Chemicals,EUR
+BAYN.DE,Bayer AG N,Euro Stoxx 50,Germany,Healthcare,Drug Manufacturers - General,EUR
+BBVA.MC,BANCO BILBAO VIZCAYA ARGENTARIA,Euro Stoxx 50,Spain,Financial Services,Banks - Diversified,EUR
+SAN.MC,BANCO SANTANDER S.A.,Euro Stoxx 50,Spain,Financial Services,Banks - Diversified,EUR
+BMW.DE,BAYERISCHE MOTOREN WERKE AG S,Euro Stoxx 50,Germany,Consumer Cyclical,Auto Manufacturers,EUR
+BNP.PA,BNP PARIBAS ACT.A,Euro Stoxx 50,France,Financial Services,Banks - Regional,EUR
+BN.PA,DANONE,Euro Stoxx 50,France,Consumer Defensive,Packaged Foods,EUR
+DBK.DE,DEUTSCHE BANK AG N,Euro Stoxx 50,Germany,Financial Services,Banks - Regional,EUR
+DB1.DE,DEUTSCHE BOERSE AG N,Euro Stoxx 50,Germany,Financial Services,Financial Data & Stock Exchanges,EUR
+DHL.DE,DHL AG N,Euro Stoxx 50,Germany,Industrials,Integrated Freight & Logistics,EUR
+DTE.DE,DEUTSCHE TELEKOM AG N,Euro Stoxx 50,Germany,Communication Services,Telecom Services,EUR
+ENEL.MI,ENEL,Euro Stoxx 50,Italy,Utilities,Utilities - Diversified,EUR
+ENI.MI,ENI,Euro Stoxx 50,Italy,Energy,Oil & Gas Integrated,EUR
+EL.PA,ESSILORLUXOTTICA,Euro Stoxx 50,France,Healthcare,Medical Instruments & Supplies,EUR
+RACE.MI,FERRARI,Euro Stoxx 50,Italy,Consumer Cyclical,Auto Manufacturers,EUR
+RMS.PA,HERMES INTL,Euro Stoxx 50,France,Consumer Cyclical,Luxury Goods,EUR
+IBE.MC,ACCIONES IBERDROLA,Euro Stoxx 50,Spain,Utilities,Utilities - Diversified,EUR
+ITX.MC,INDUSTRIA DE DISE...O TEXTIL S.,Euro Stoxx 50,Spain,Consumer Cyclical,Apparel Retail,EUR
+IFX.DE,INFINEON TECHNOLOGIES AG N,Euro Stoxx 50,Germany,Technology,Semiconductors,EUR
+INGA.AS,ING GROEP N.V.,Euro Stoxx 50,Netherlands,Financial Services,Banks - Diversified,EUR
+ISP.MI,INTESA SANPAOLO,Euro Stoxx 50,Italy,Financial Services,Banks - Regional,EUR
+OR.PA,L'OREAL,Euro Stoxx 50,France,Consumer Defensive,Household & Personal Products,EUR
+MC.PA,LVMH,Euro Stoxx 50,France,Consumer Cyclical,Luxury Goods,EUR
+MBG.DE,Mercedes-Benz Group AG N,Euro Stoxx 50,Germany,Consumer Cyclical,Auto Manufacturers,EUR
+MUV2.DE,MUENCHENER RUECKVERS.-GES. AG N,Euro Stoxx 50,Germany,Financial Services,Insurance - Reinsurance,EUR
+NDA-FI.HE,Nordea Bank Abp,Euro Stoxx 50,Finland,Financial Services,Banks - Regional,EUR
+PRX.AS,PROSUS,Euro Stoxx 50,Netherlands,Consumer Cyclical,Internet Retail,EUR
+RHM.DE,RHEINMETALL AG I,Euro Stoxx 50,Germany,Industrials,Aerospace & Defense,EUR
+SAF.PA,SAFRAN,Euro Stoxx 50,France,Industrials,Aerospace & Defense,EUR
+SGO.PA,SAINT GOBAIN,Euro Stoxx 50,France,Industrials,Building Products & Equipment,EUR
+SAN.PA,SANOFI,Euro Stoxx 50,France,Healthcare,Drug Manufacturers - General,EUR
+SAP.DE,SAP SE I,Euro Stoxx 50,Germany,Technology,Software - Application,EUR
+SU.PA,SCHNEIDER ELECTRIC SE,Euro Stoxx 50,France,Industrials,Specialty Industrial Machinery,EUR
+SIE.DE,SIEMENS AG N,Euro Stoxx 50,Germany,Industrials,Specialty Industrial Machinery,EUR
+ENR.DE,Siemens Energy AG N,Euro Stoxx 50,Germany,Industrials,Specialty Industrial Machinery,EUR
+TTE.PA,TOTALENERGIES,Euro Stoxx 50,France,Energy,Oil & Gas Integrated,EUR
+DG.PA,VINCI,Euro Stoxx 50,France,Industrials,Engineering & Construction,EUR
+UCG.MI,UNICREDIT,Euro Stoxx 50,Italy,Financial Services,Banks - Regional,EUR
+VOW.DE,VOLKSWAGEN AG I,Euro Stoxx 50,Germany,Consumer Cyclical,Auto Manufacturers,EUR
+WKL.AS,WOLTERS KLUWER,Euro Stoxx 50,Netherlands,Industrials,Specialty Business Services,EUR
+III.L,3I GROUP PLC ORD 73 19/22P,FTSE 100,United Kingdom,Financial Services,Asset Management,GBp
+ABDN.L,ABERDEEN GROUP PLC ORD 13 61/63,FTSE 100,United Kingdom,Financial Services,Asset Management,GBp
+ADM.L,ADMIRAL GROUP PLC ORD 0.1P,FTSE 100,United Kingdom,Financial Services,Insurance - Property & Casualty,GBp
+AAF.L,AIRTEL AFRICA PLC ORD USD0.50,FTSE 100,United Kingdom,Communication Services,Telecom Services,GBp
+ALW.L,ALLIANCE WITAN PLC ORD 2.5P,FTSE 100,United Kingdom,Financial Services,Asset Management,GBp
+AAL.L,ANGLO AMERICAN PLC ORD USD0.623,FTSE 100,United Kingdom,Basic Materials,Other Industrial Metals & Mining,GBp
+ANTO.L,ANTOFAGASTA PLC ORD 5P,FTSE 100,United Kingdom,Basic Materials,Copper,GBp
+ABF.L,ASSOCIATED BRITISH FOODS PLC OR,FTSE 100,United Kingdom,Consumer Defensive,Packaged Foods,GBp
+AZN.L,ASTRAZENECA PLC ORD SHS $0.25,FTSE 100,United Kingdom,Healthcare,Drug Manufacturers - General,GBp
+AUTO.L,AUTOTRADER GROUP PLC ORD 1P,FTSE 100,United Kingdom,Communication Services,Internet Content & Information,GBp
+AV.L,AVIVA PLC ORD 32 17/19P,FTSE 100,United Kingdom,Financial Services,Insurance - Diversified,GBp
+BAB.L,BABCOCK INTERNATIONAL GROUP PLC,FTSE 100,United Kingdom,Industrials,Engineering & Construction,GBp
+BA.L,BAE SYSTEMS PLC ORD 2.5P,FTSE 100,United Kingdom,Industrials,Aerospace & Defense,GBp
+BBY.L,BALFOUR BEATTY PLC ORD 50P,FTSE 100,United Kingdom,Industrials,Engineering & Construction,GBp
+BARC.L,BARCLAYS PLC ORD 25P,FTSE 100,United Kingdom,Financial Services,Banks - Diversified,GBp
+BTRW.L,BARRATT REDROW PLC ORD 10P,FTSE 100,United Kingdom,Consumer Cyclical,Residential Construction,GBp
+BP.L,BP PLC $0.25,FTSE 100,United Kingdom,Energy,Oil & Gas Integrated,GBp
+BATS.L,BRITISH AMERICAN TOBACCO PLC OR,FTSE 100,United Kingdom,Consumer Defensive,Tobacco,GBp
+BLND.L,BRITISH LAND COMPANY PLC ORD 25,FTSE 100,United Kingdom,Real Estate,REIT - Diversified,GBp
+BT-A.L,BT GROUP PLC ORD 5P,FTSE 100,United Kingdom,Communication Services,Telecom Services,GBp
+BNZL.L,BUNZL PLC ORD 32 1/7P,FTSE 100,United Kingdom,Consumer Defensive,Food Distribution,GBp
+BRBY.L,BURBERRY GROUP PLC ORD 0.05P,FTSE 100,United Kingdom,Consumer Cyclical,Luxury Goods,GBp
+CNA.L,CENTRICA PLC ORD 6 14/81P,FTSE 100,United Kingdom,Utilities,Utilities - Independent Power Producers,GBp
+CCEP.L,COCA-COLA EUROPACIFIC PARTNERS,FTSE 100,United Kingdom,Consumer Defensive,Beverages - Non-Alcoholic,GBp
+CCH.L,COCA-COLA HBC AG ORD CHF6.70 (C,FTSE 100,Switzerland,Consumer Defensive,Beverages - Non-Alcoholic,GBp
+CPG.L,COMPASS GROUP PLC ORD 11 1/20P,FTSE 100,United Kingdom,Consumer Cyclical,Restaurants,USD
+CCC.L,COMPUTACENTER PLC ORD 7 5/9P,FTSE 100,United Kingdom,Technology,Information Technology Services,GBp
+CTEC.L,CONVATEC GROUP PLC ORD 10P,FTSE 100,United Kingdom,Healthcare,Medical Instruments & Supplies,GBp
+CRDA.L,CRODA INTERNATIONAL PLC ORD 10.,FTSE 100,United Kingdom,Basic Materials,Specialty Chemicals,GBp
+DCC.L,DCC ENERGY PLC ORD EUR0.25 (CDI,FTSE 100,Ireland,Energy,Oil & Gas Refining & Marketing,GBp
+DGE.L,DIAGEO PLC ORD 28 101/108P,FTSE 100,United Kingdom,Consumer Defensive,Beverages - Wineries & Distilleries,GBp
+DPLM.L,DIPLOMA PLC ORD 5P,FTSE 100,United Kingdom,Industrials,Industrial Distribution,GBp
+EZJ.L,EASYJET PLC ORD 27 2/7P,FTSE 100,United Kingdom,Industrials,Airlines,GBp
+EDV.L,ENDEAVOUR MINING PLC ORD USD0.0,FTSE 100,United Kingdom,Basic Materials,Gold,GBp
+EXPN.L,EXPERIAN PLC ORD USD0.10,FTSE 100,Ireland,Industrials,Consulting Services,GBp
+FCIT.L,F&C INVESTMENT TRUST PLC ORD 6.,FTSE 100,United States,Financial Services,Asset Management,GBp
+FRES.L,FRESNILLO PLC ORD USD0.50,FTSE 100,Mexico,Basic Materials,Other Precious Metals & Mining,GBp
+GAW.L,GAMES WORKSHOP GROUP PLC ORD 5P,FTSE 100,United Kingdom,Consumer Cyclical,Leisure,GBp
+GLEN.L,GLENCORE PLC ORD USD0.01,FTSE 100,Switzerland,Basic Materials,Other Industrial Metals & Mining,GBp
+GSK.L,GSK PLC ORD 31 1/4P,FTSE 100,United Kingdom,Healthcare,Drug Manufacturers - General,GBp
+HLN.L,HALEON PLC ORD GBP0.01,FTSE 100,United Kingdom,Healthcare,Drug Manufacturers - Specialty & Generic,GBp
+HLMA.L,HALMA PLC ORD 10P,FTSE 100,United Kingdom,Industrials,Conglomerates,GBp
+HSX.L,HISCOX LTD ORD 6.5P (DI),FTSE 100,Bermuda,Financial Services,Insurance - Property & Casualty,GBp
+HWDN.L,HOWDEN JOINERY GROUP PLC ORD 10,FTSE 100,United Kingdom,Consumer Cyclical,"Furnishings, Fixtures & Appliances",GBp
+HSBA.L,HSBC HOLDINGS PLC ORD $0.50 (UK,FTSE 100,United Kingdom,Financial Services,Banks - Diversified,GBp
+ICG.L,ICG PLC ORD 26 1/4P,FTSE 100,United Kingdom,Financial Services,Asset Management,GBp
+IGG.L,IG GROUP HOLDINGS PLC ORD 0.005,FTSE 100,United Kingdom,Financial Services,Capital Markets,GBp
+IHG.L,INTERCONTINENTAL HOTELS GROUP P,FTSE 100,United Kingdom,Consumer Cyclical,Lodging,USD
+IMI.L,IMI PLC ORD 28 4/7P,FTSE 100,United Kingdom,Industrials,Specialty Industrial Machinery,GBp
+IMB.L,IMPERIAL BRANDS PLC ORD 10P,FTSE 100,United Kingdom,Consumer Defensive,Tobacco,GBp
+INF.L,INFORMA PLC ORD 0.1P,FTSE 100,United Kingdom,Communication Services,Publishing,GBp
+IAG.L,INTERNATIONAL CONSOLIDATED AIRL,FTSE 100,United Kingdom,Industrials,Airlines,GBp
+ITRK.L,INTERTEK GROUP PLC ORD 1P,FTSE 100,United Kingdom,Industrials,Specialty Business Services,GBp
+INVP.L,INVESTEC PLC ORD GBP0.0002,FTSE 100,South Africa,Financial Services,Capital Markets,GBp
+ITH.L,ITHACA ENERGY PLC ORD 1P,FTSE 100,United Kingdom,Energy,Oil & Gas E&P,GBp
+JD.L,JD SPORTS FASHION PLC ORD 0.05P,FTSE 100,United Kingdom,Consumer Cyclical,Apparel Retail,GBp
+BGEO.L,LION FINANCE GROUP PLC ORD 1P,FTSE 100,United Kingdom,Financial Services,Banks - Regional,GBp
+KGF.L,KINGFISHER PLC ORD 15 5/7P,FTSE 100,United Kingdom,Consumer Cyclical,Home Improvement Retail,GBp
+LAND.L,LAND SECURITIES GROUP PLC ORD 1,FTSE 100,United Kingdom,Real Estate,REIT - Diversified,GBp
+LGEN.L,LEGAL & GENERAL GROUP PLC ORD 2,FTSE 100,United Kingdom,Financial Services,Asset Management,GBp
+LLOY.L,LLOYDS BANKING GROUP PLC ORD 10,FTSE 100,United Kingdom,Financial Services,Banks - Regional,GBp
+LMP.L,LONDONMETRIC PROPERTY PLC ORD 1,FTSE 100,United Kingdom,Real Estate,REIT - Industrial,GBp
+LSEG.L,LONDON STOCK EXCHANGE GROUP PLC,FTSE 100,United Kingdom,Financial Services,Financial Data & Stock Exchanges,GBp
+MNG.L,M&G PLC,FTSE 100,United Kingdom,Financial Services,Asset Management,GBp
+MKS.L,MARKS AND SPENCER GROUP PLC ORD,FTSE 100,United Kingdom,Consumer Cyclical,Department Stores,GBp
+MRO.L,MELROSE INDUSTRIES PLC ORD GBP0,FTSE 100,United Kingdom,Industrials,Specialty Industrial Machinery,GBp
+MTLN.L,METLEN ENERGY & METALS PLC ORD,FTSE 100,Greece,Utilities,Utilities - Diversified,EUR
+NG.L,NATIONAL GRID PLC ORD 12 204/47,FTSE 100,United Kingdom,Utilities,Utilities - Regulated Electric,GBp
+NWG.L,NATWEST GROUP PLC ORD 107.69P,FTSE 100,United Kingdom,Financial Services,Banks - Regional,GBp
+NXT.L,NEXT PLC ORD 10P,FTSE 100,United Kingdom,Consumer Cyclical,Apparel Retail,GBp
+PSON.L,PEARSON PLC ORD 25P,FTSE 100,United Kingdom,Communication Services,Publishing,GBp
+PSH.L,PERSHING SQUARE HOLDINGS LTD OR,FTSE 100,United States,Financial Services,Asset Management,GBp
+PCT.L,POLAR CAPITAL TECHNOLOGY TRUST,FTSE 100,United Kingdom,Financial Services,Asset Management,GBp
+PRU.L,PRUDENTIAL PLC ORD 5P,FTSE 100,Hong Kong,Financial Services,Insurance - Life,GBp
+RKT.L,RECKITT BENCKISER GROUP PLC ORD,FTSE 100,United Kingdom,Consumer Defensive,Household & Personal Products,GBp
+REL.L,RELX PLC ORD 14 51/116P,FTSE 100,United Kingdom,Industrials,Specialty Business Services,GBp
+RTO.L,RENTOKIL INITIAL PLC ORD 1P,FTSE 100,United Kingdom,Industrials,Specialty Business Services,GBp
+RIO.L,RIO TINTO PLC ORD 10P,FTSE 100,United Kingdom,Basic Materials,Other Industrial Metals & Mining,GBp
+RR.L,ROLLS-ROYCE HOLDINGS PLC ORD SH,FTSE 100,United Kingdom,Industrials,Aerospace & Defense,GBp
+SGE.L,THE SAGE GROUP PLC ORD 1 4/77P,FTSE 100,United Kingdom,Technology,Software - Application,GBp
+SBRY.L,SAINSBURY (J) PLC ORD 28 4/7P,FTSE 100,United Kingdom,Consumer Defensive,Grocery Stores,GBp
+SMT.L,SCOTTISH MORTGAGE INVESTMENT TR,FTSE 100,United Kingdom,Financial Services,Asset Management,GBp
+SGRO.L,SEGRO PLC ORD 10P,FTSE 100,United Kingdom,Real Estate,REIT - Industrial,GBp
+SVT.L,SEVERN TRENT PLC ORD 97 17/19P,FTSE 100,United Kingdom,Utilities,Utilities - Regulated Water,GBp
+SHEL.L,SHELL PLC ORD EUR0.07,FTSE 100,United Kingdom,Energy,Oil & Gas Integrated,GBp
+SMIN.L,SMITHS GROUP PLC ORD 37.5P,FTSE 100,United Kingdom,Industrials,Specialty Industrial Machinery,GBp
+SN.L,SMITH & NEPHEW PLC ORD USD0.20,FTSE 100,United Kingdom,Healthcare,Medical Devices,GBp
+SPX.L,SPIRAX GROUP PLC ORD 26 12/13P,FTSE 100,United Kingdom,Industrials,Specialty Industrial Machinery,GBp
+SSE.L,SSE PLC ORD 50P,FTSE 100,United Kingdom,Utilities,Utilities - Diversified,GBp
+STAN.L,STANDARD CHARTERED PLC ORD USD0,FTSE 100,United Kingdom,Financial Services,Banks - Diversified,GBp
+SDLF.L,STANDARD LIFE PLC ORD 10P,FTSE 100,United Kingdom,Financial Services,Insurance - Life,GBp
+STJ.L,ST. JAMES'S PLACE PLC ORD 15P,FTSE 100,United Kingdom,Financial Services,Asset Management,GBp
+TSCO.L,TESCO PLC ORD 6 1/3P,FTSE 100,United Kingdom,Consumer Defensive,Grocery Stores,GBp
+BBOX.L,TRITAX BIG BOX REIT PLC ORD 1P,FTSE 100,United Kingdom,Real Estate,REIT - Industrial,GBp
+ULVR.L,UNILEVER PLC ORD 3.5P,FTSE 100,United Kingdom,Consumer Defensive,Household & Personal Products,GBp
+UU.L,UNITED UTILITIES GROUP PLC ORD,FTSE 100,United Kingdom,Utilities,Utilities - Regulated Water,GBp
+VOD.L,VODAFONE GROUP PLC ORD USD0.20,FTSE 100,United Kingdom,Communication Services,Telecom Services,GBp
+WEIR.L,WEIR PLC ORD 12.5P,FTSE 100,United Kingdom,Industrials,Specialty Industrial Machinery,GBp
+WTB.L,WHITBREAD PLC ORD 76 122/153P,FTSE 100,United Kingdom,Consumer Cyclical,Lodging,GBp
+WPP.L,WPP PLC ORD 10P,FTSE 100,United Kingdom,Communication Services,Advertising Agencies,GBp
+NOVN.SW,NOVARTIS N,SMI,Switzerland,Healthcare,Drug Manufacturers - General,CHF
+ROP.SW,ROCHE PS,SMI,Switzerland,Healthcare,Drug Manufacturers - General,CHF
+NESN.SW,NESTLE N,SMI,Switzerland,Consumer Defensive,Packaged Foods,CHF
+ABBN.SW,ABB LTD N,SMI,Switzerland,Industrials,Electrical Equipment & Parts,CHF
+UBSG.SW,UBS GROUP N,SMI,Switzerland,Financial Services,Banks - Diversified,CHF
+CFR.SW,RICHEMONT N,SMI,Switzerland,Consumer Cyclical,Luxury Goods,CHF
+ZURN.SW,ZURICH INSURANCE N,SMI,Switzerland,Financial Services,Insurance - Diversified,CHF
+HOLN.SW,HOLCIM N,SMI,Switzerland,Basic Materials,Building Materials,CHF
+SREN.SW,SWISS RE N,SMI,Switzerland,Financial Services,Insurance - Reinsurance,CHF
+LONN.SW,LONZA N,SMI,Switzerland,Healthcare,Diagnostics & Research,CHF
+SDZ.SW,SANDOZ GROUP N,SMI,Switzerland,Healthcare,Drug Manufacturers - Specialty & Generic,CHF
+GIVN.SW,GIVAUDAN N,SMI,Switzerland,Basic Materials,Specialty Chemicals,CHF
+ALC.SW,ALCON N,SMI,Switzerland,Healthcare,Medical Instruments & Supplies,CHF
+SIKA.SW,SIKA N,SMI,Switzerland,Basic Materials,Specialty Chemicals,CHF
+AMRZ.SW,AMRIZE N,SMI,Switzerland,Basic Materials,Building Materials,CHF
+SLHN.SW,SWISS LIFE HOLDING AG N,SMI,Switzerland,Financial Services,Insurance - Diversified,CHF
+GALD.SW,GALDERMA GROUP N,SMI,Switzerland,Healthcare,Drug Manufacturers - Specialty & Generic,CHF
+GEBN.SW,GEBERIT N,SMI,Switzerland,Industrials,Building Products & Equipment,CHF
+PGHN.SW,PARTNERS GROUP N,SMI,Switzerland,Financial Services,Asset Management,CHF
+LOGN.SW,LOGITECH N,SMI,Switzerland,Technology,Computer Hardware,CHF
+AAPL,Apple Inc.,S&P 100,United States,Technology,Consumer Electronics,USD
+ABBV,AbbVie Inc.,S&P 100,United States,Healthcare,Drug Manufacturers - General,USD
+ABT,Abbott Laboratories,S&P 100,United States,Healthcare,Medical Devices,USD
+ACN,Accenture plc,S&P 100,Ireland,Technology,Information Technology Services,USD
+ADBE,Adobe Inc.,S&P 100,United States,Technology,Software - Application,USD
+AMAT,"Applied Materials, Inc.",S&P 100,United States,Technology,Semiconductor Equipment & Materials,USD
+AMD,"Advanced Micro Devices, Inc.",S&P 100,United States,Technology,Semiconductors,USD
+AMGN,Amgen Inc.,S&P 100,United States,Healthcare,Drug Manufacturers - General,USD
+AMT,American Tower Corporation (REI,S&P 100,United States,Real Estate,REIT - Specialty,USD
+AMZN,"Amazon.com, Inc.",S&P 100,United States,Consumer Cyclical,Internet Retail,USD
+ANET,"Arista Networks, Inc.",S&P 100,United States,Technology,Computer Hardware,USD
+AVGO,Broadcom Inc.,S&P 100,United States,Technology,Semiconductors,USD
+AXP,American Express Company,S&P 100,United States,Financial Services,Credit Services,USD
+BA,Boeing Company (The),S&P 100,United States,Industrials,Aerospace & Defense,USD
+BAC,Bank of America Corporation,S&P 100,United States,Financial Services,Banks - Diversified,USD
+BKNG,Booking Holdings Inc. Common St,S&P 100,United States,Consumer Cyclical,Travel Services,USD
+BLK,"BlackRock, Inc.",S&P 100,United States,Financial Services,Asset Management,USD
+BMY,Bristol-Myers Squibb Company,S&P 100,United States,Healthcare,Drug Manufacturers - General,USD
+BNY,The Bank of New York Mellon Cor,S&P 100,United States,Financial Services,Banks - Diversified,USD
+BRK-B,Berkshire Hathaway Inc. New,S&P 100,United States,Financial Services,Insurance - Diversified,USD
+C,"Citigroup, Inc.",S&P 100,United States,Financial Services,Banks - Diversified,USD
+CAT,"Caterpillar, Inc.",S&P 100,United States,Industrials,Farm & Heavy Construction Machinery,USD
+CMCSA,Comcast Corporation,S&P 100,United States,Communication Services,Telecom Services,USD
+COF,Capital One Financial Corporati,S&P 100,United States,Financial Services,Credit Services,USD
+COP,ConocoPhillips,S&P 100,United States,Energy,Oil & Gas E&P,USD
+COST,Costco Wholesale Corporation,S&P 100,United States,Consumer Defensive,Discount Stores,USD
+CRM,"Salesforce, Inc.",S&P 100,United States,Technology,Software - Application,USD
+CSCO,"Cisco Systems, Inc.",S&P 100,United States,Technology,Communication Equipment,USD
+CVS,CVS Health Corporation,S&P 100,United States,Healthcare,Healthcare Plans,USD
+CVX,Chevron Corporation,S&P 100,United States,Energy,Oil & Gas Integrated,USD
+DE,Deere & Company,S&P 100,United States,Industrials,Farm & Heavy Construction Machinery,USD
+DELL,Dell Technologies Inc.,S&P 100,United States,Technology,Computer Hardware,USD
+DHR,Danaher Corporation,S&P 100,United States,Healthcare,Diagnostics & Research,USD
+DIS,Walt Disney Company (The),S&P 100,United States,Communication Services,Entertainment,USD
+DUK,Duke Energy Corporation (Holdin,S&P 100,United States,Utilities,Utilities - Regulated Electric,USD
+EMR,Emerson Electric Company,S&P 100,United States,Industrials,Specialty Industrial Machinery,USD
+FDX,FedEx Corporation,S&P 100,United States,Industrials,Integrated Freight & Logistics,USD
+GD,General Dynamics Corporation,S&P 100,United States,Industrials,Aerospace & Defense,USD
+GE,GE Aerospace,S&P 100,United States,Industrials,Aerospace & Defense,USD
+GEV,GE Vernova Inc.,S&P 100,United States,Industrials,Specialty Industrial Machinery,USD
+GILD,"Gilead Sciences, Inc.",S&P 100,United States,Healthcare,Drug Manufacturers - General,USD
+GM,General Motors Company,S&P 100,United States,Consumer Cyclical,Auto Manufacturers,USD
+GOOG,Alphabet Inc.,S&P 100,United States,Communication Services,Internet Content & Information,USD
+GOOGL,Alphabet Inc.,S&P 100,United States,Communication Services,Internet Content & Information,USD
+GS,"Goldman Sachs Group, Inc. (The)",S&P 100,United States,Financial Services,Capital Markets,USD
+HD,"Home Depot, Inc. (The)",S&P 100,United States,Consumer Cyclical,Home Improvement Retail,USD
+IBM,International Business Machines,S&P 100,United States,Technology,Information Technology Services,USD
+INTC,Intel Corporation,S&P 100,United States,Technology,Semiconductors,USD
+INTU,Intuit Inc.,S&P 100,United States,Technology,Software - Application,USD
+ISRG,"Intuitive Surgical, Inc.",S&P 100,United States,Healthcare,Medical Instruments & Supplies,USD
+JNJ,Johnson & Johnson,S&P 100,United States,Healthcare,Drug Manufacturers - General,USD
+JPM,JP Morgan Chase & Co.,S&P 100,United States,Financial Services,Banks - Diversified,USD
+KO,Coca-Cola Company (The),S&P 100,United States,Consumer Defensive,Beverages - Non-Alcoholic,USD
+LIN,Linde plc,S&P 100,United Kingdom,Basic Materials,Specialty Chemicals,USD
+LLY,Eli Lilly and Company,S&P 100,United States,Healthcare,Drug Manufacturers - General,USD
+LMT,Lockheed Martin Corporation,S&P 100,United States,Industrials,Aerospace & Defense,USD
+LOW,"Lowe's Companies, Inc.",S&P 100,United States,Consumer Cyclical,Home Improvement Retail,USD
+LRCX,Lam Research Corporation,S&P 100,United States,Technology,Semiconductor Equipment & Materials,USD
+MA,Mastercard Incorporated,S&P 100,United States,Financial Services,Credit Services,USD
+MCD,McDonald's Corporation,S&P 100,United States,Consumer Cyclical,Restaurants,USD
+MDLZ,"Mondelez International, Inc.",S&P 100,United States,Consumer Defensive,Confectioners,USD
+MDT,Medtronic plc.,S&P 100,Ireland,Healthcare,Medical Devices,USD
+META,"Meta Platforms, Inc.",S&P 100,United States,Communication Services,Internet Content & Information,USD
+MMM,3M Company,S&P 100,United States,Industrials,Conglomerates,USD
+MO,"Altria Group, Inc.",S&P 100,United States,Consumer Defensive,Tobacco,USD
+MRK,"Merck & Company, Inc.",S&P 100,United States,Healthcare,Drug Manufacturers - General,USD
+MS,Morgan Stanley,S&P 100,United States,Financial Services,Capital Markets,USD
+MSFT,Microsoft Corporation,S&P 100,United States,Technology,Software - Infrastructure,USD
+MU,"Micron Technology, Inc.",S&P 100,United States,Technology,Semiconductors,USD
+NEE,"NextEra Energy, Inc.",S&P 100,United States,Utilities,Utilities - Regulated Electric,USD
+NFLX,"Netflix, Inc.",S&P 100,United States,Communication Services,Entertainment,USD
+NOW,"ServiceNow, Inc.",S&P 100,United States,Technology,Software - Application,USD
+NVDA,NVIDIA Corporation,S&P 100,United States,Technology,Semiconductors,USD
+ORCL,Oracle Corporation,S&P 100,United States,Technology,Software - Infrastructure,USD
+PANW,"Palo Alto Networks, Inc.",S&P 100,United States,Technology,Software - Infrastructure,USD
+PEP,"Pepsico, Inc.",S&P 100,United States,Consumer Defensive,Beverages - Non-Alcoholic,USD
+PFE,"Pfizer, Inc.",S&P 100,United States,Healthcare,Drug Manufacturers - General,USD
+PG,Procter & Gamble Company (The),S&P 100,United States,Consumer Defensive,Household & Personal Products,USD
+PLTR,Palantir Technologies Inc.,S&P 100,United States,Technology,Software - Infrastructure,USD
+PM,Philip Morris International Inc,S&P 100,United States,Consumer Defensive,Tobacco,USD
+QCOM,QUALCOMM Incorporated,S&P 100,United States,Technology,Semiconductors,USD
+RTX,RTX Corporation,S&P 100,United States,Industrials,Aerospace & Defense,USD
+SBUX,Starbucks Corporation,S&P 100,United States,Consumer Cyclical,Restaurants,USD
+SCHW,Charles Schwab Corporation (The,S&P 100,United States,Financial Services,Capital Markets,USD
+SNDK,Sandisk Corporation,S&P 100,United States,Technology,Computer Hardware,USD
+SO,Southern Company (The),S&P 100,United States,Utilities,Utilities - Regulated Electric,USD
+T,AT&T Inc.,S&P 100,United States,Communication Services,Telecom Services,USD
+TMO,Thermo Fisher Scientific Inc,S&P 100,United States,Healthcare,Diagnostics & Research,USD
+TMUS,"T-Mobile US, Inc.",S&P 100,United States,Communication Services,Telecom Services,USD
+TSLA,"Tesla, Inc.",S&P 100,United States,Consumer Cyclical,Auto Manufacturers,USD
+TXN,Texas Instruments Incorporated,S&P 100,United States,Technology,Semiconductors,USD
+UBER,"Uber Technologies, Inc.",S&P 100,United States,Technology,Software - Application,USD
+UNH,UnitedHealth Group Incorporated,S&P 100,United States,Healthcare,Healthcare Plans,USD
+UNP,Union Pacific Corporation,S&P 100,United States,Industrials,Railroads,USD
+UPS,"United Parcel Service, Inc.",S&P 100,United States,Industrials,Integrated Freight & Logistics,USD
+USB,U.S. Bancorp,S&P 100,United States,Financial Services,Banks - Regional,USD
+V,Visa Inc.,S&P 100,United States,Financial Services,Credit Services,USD
+VZ,Verizon Communications Inc.,S&P 100,United States,Communication Services,Telecom Services,USD
+WFC,Wells Fargo & Company,S&P 100,United States,Financial Services,Banks - Diversified,USD
+WMT,Walmart Inc.,S&P 100,United States,Consumer Defensive,Discount Stores,USD
+XOM,ExxonMobil Holdings Corporation,S&P 100,United States,Energy,Oil & Gas Integrated,USD

@@ -10,7 +10,15 @@ allocation:
   core_target: 0.80
   satellite_target: 0.20
   satellite_max: 0.25            # proposition : marge de 5 pts au-dessus de la cible
-  satellite_themes: [IA, Energie]
+  satellite_themes:              # thème -> industries Yahoo qui vont dans le satellite
+    IA:
+      - Semiconductors
+      - Semiconductor Equipment & Materials
+    Energie:
+      - Oil & Gas Integrated
+      - Oil & Gas E&P
+      - Utilities - Renewable
+      - Uranium
 
 limits:
   max_line_weight: 0.10          # proposition : une ligne du cœur ne dépasse pas 10 %
@@ -33,6 +41,25 @@ risk:
 core_style:
   min_dividend_yield: 0.02       # proposition : rendement min pour entrer dans le cœur
   max_payout_ratio: 0.80         # proposition : au-delà, dividende jugé peu soutenable
+
+screening:
+  history_years: 6               # historique chargé pour le screening
+  volatility_years: 3            # fenêtre de calcul de la volatilité
+  dividend_years: 5              # années civiles complètes analysées
+  dividend_cut_tolerance: 0.10   # une baisse de plus de 10 % sur un an compte comme une coupe
+  special_dividend_multiple: 1.5  # pic > 1,5x l'an passé et non répété ensuite = exceptionnel, ignoré
+  max_dividend_cuts: 1           # proposition : au plus 1 coupe sur la période
+  core_shortlist_size: 15        # proposition
+  satellite_shortlist_size: 6    # proposition
+  shortlist_max_per_sector: 3    # proposition : diversifie la short-list dès le départ
+  core_score_weights:            # poids des critères du score cœur (somme = 1)
+    dividend_yield: 0.25         # plus haut = mieux
+    payout_ratio: 0.25           # plus bas = mieux (dividende plus soutenable)
+    dividend_growth: 0.25        # plus haut = mieux
+    volatility: 0.25             # plus bas = mieux
+  satellite_score_weights:
+    volatility: 0.5              # plus bas = mieux
+    market_cap: 0.5              # plus haut = mieux (titres plus établis et liquides)
 
 exclusions:
   # Industries Yahoo Finance exclues (tabac, alcool, jeux d'argent)

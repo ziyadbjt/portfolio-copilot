@@ -30,6 +30,10 @@ def test_policy_is_immutable():
     p = load_policy()
     with pytest.raises(Exception):
         p.risk.max_drawdown = 0.5
+    with pytest.raises(TypeError):
+        p.screening.core_score_weights["volatility"] = 1.0
+    with pytest.raises(TypeError):
+        p.allocation.satellite_themes["IA"] = ("Tobacco",)
 
 
 def test_missing_file():
@@ -86,3 +90,39 @@ def test_parse_does_not_mutate_input(raw):
     before = copy.deepcopy(raw)
     parse_policy(raw)
     assert raw == before
+
+
+def test_screening_loaded():
+    s = load_policy().screening
+    assert s.core_shortlist_size == 15
+    assert sum(s.core_score_weights.values()) == pytest.approx(1.0)
+
+
+def test_satellite_themes_map_to_industries():
+    themes = load_policy().allocation.satellite_themes
+    assert "Semiconductors" in themes["IA"]
+    assert "Oil & Gas Integrated" in themes["Energie"]
+
+
+def test_score_weights_must_sum_to_one(raw):
+    raw["screening"]["core_score_weights"]["volatility"] = 0.5
+    with pytest.raises(PolicyError, match="doivent faire 1"):
+        parse_policy(raw)
+
+
+def test_unknown_score_criterion(raw):
+    raw["screening"]["satellite_score_weights"] = {"momentum": 1.0}
+    with pytest.raises(PolicyError, match="momentum"):
+        parse_policy(raw)
+
+
+def test_shortlist_too_small_to_invest_core(raw):
+    raw["screening"]["core_shortlist_size"] = 5      # 5 x 10 % < 80 %
+    with pytest.raises(PolicyError, match="core_shortlist_size"):
+        parse_policy(raw)
+
+
+def test_industry_cannot_be_satellite_and_excluded(raw):
+    raw["allocation"]["satellite_themes"]["IA"].append("Tobacco")
+    with pytest.raises(PolicyError, match="satellite et exclue"):
+        parse_policy(raw)

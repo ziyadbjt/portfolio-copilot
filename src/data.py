@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -31,13 +32,32 @@ class DataError(RuntimeError):
 
 # --- Accès réseau (isolé) ----------------------------------------------------
 
+def _with_retries(fn, what: str, attempts: int = 3, wait_s: float = 2.0):
+    """Réessaie un appel réseau ; au dernier échec, lève une DataError lisible."""
+    for attempt in range(1, attempts + 1):
+        try:
+            return fn()
+        except DataError:
+            raise                                # réponse claire de Yahoo : inutile de réessayer
+        except Exception as e:                   # coupure, délai dépassé, limite de requêtes...
+            if attempt == attempts:
+                raise DataError(f"{what} : échec après {attempts} essais ({type(e).__name__}).") from e
+            time.sleep(wait_s * attempt)
+
+
 def _download_history(ticker: str, start: dt.date, end: dt.date) -> tuple[pd.DataFrame, str]:
     """Télécharge prix ajustés et dividendes. Renvoie (DataFrame[close, dividends], devise)."""
     import yfinance as yf
 
+    # Sans ça, yfinance masque les erreurs réseau et renvoie un tableau vide :
+    # un simple délai dépassé passerait pour "pas de données", sans réessai
+    yf.config.debug.hide_exceptions = False
     tk = yf.Ticker(ticker)
     # yfinance traite end comme exclusif : on ajoute un jour
-    hist = tk.history(start=start, end=end + dt.timedelta(days=1), auto_adjust=True)
+    hist = _with_retries(
+        lambda: tk.history(start=start, end=end + dt.timedelta(days=1), auto_adjust=True),
+        f"Historique {ticker}",
+    )
     if hist.empty:
         raise DataError(f"Aucune donnée Yahoo pour {ticker}.")
     currency = tk.history_metadata.get("currency")
@@ -101,6 +121,53 @@ def get_history(
                      "fetched": today.isoformat(), "currency": currency}
     index_path.write_text(json.dumps(index, indent=2, sort_keys=True), encoding="utf-8")
     return df.loc[pd.Timestamp(start):pd.Timestamp(end)], currency
+
+
+FUNDAMENTAL_FIELDS = {          # nom Yahoo -> nom dans le projet
+    "shortName": "name",
+    "country": "country",
+    "sector": "sector",
+    "industry": "industry",
+    "payoutRatio": "payout_ratio",
+    "marketCap": "market_cap",
+    "currency": "currency",
+}
+
+
+def _download_fundamentals(ticker: str) -> dict:
+    import yfinance as yf
+
+    info = _with_retries(lambda: yf.Ticker(ticker).info, f"Fondamentaux {ticker}") or {}
+    return {ours: info.get(theirs) for theirs, ours in FUNDAMENTAL_FIELDS.items()}
+
+
+def get_fundamentals(
+    tickers: list[str], cache_dir: Path = DEFAULT_CACHE_DIR, max_age_days: int = 7
+) -> pd.DataFrame:
+    """Pays, secteur, industrie, payout... par ticker (une ligne par ticker).
+
+    Le rendement du dividende n'est pas pris ici : celui de Yahoo est faux pour
+    les titres cotés en pence. On le recalcule à partir de l'historique.
+    """
+    cache_dir = Path(cache_dir)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    path = cache_dir / "fundamentals.json"
+    cache = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    today = dt.date.today()
+
+    rows = {}
+    for ticker in tickers:
+        entry = cache.get(ticker)
+        if entry is None or (today - dt.date.fromisoformat(entry["fetched"])).days >= max_age_days:
+            try:
+                entry = {**_download_fundamentals(ticker), "fetched": today.isoformat()}
+            except Exception as e:  # yfinance lève des erreurs variées (HTTP, JSON...)
+                entry = {"error": str(e), "fetched": today.isoformat()}
+            cache[ticker] = entry
+            path.write_text(json.dumps(cache, indent=2, sort_keys=True), encoding="utf-8")
+        rows[ticker] = {k: entry.get(k) for k in FUNDAMENTAL_FIELDS.values()}
+
+    return pd.DataFrame.from_dict(rows, orient="index").rename_axis("ticker")
 
 
 # --- Fonctions pures ---------------------------------------------------------
@@ -177,6 +244,7 @@ def find_suspicious_jumps(prices: pd.DataFrame, threshold: float = 0.5) -> pd.Da
 class MarketData:
     prices: pd.DataFrame            # prix ajustés en devise de base, nettoyés
     dividends: pd.DataFrame         # dividendes par action, en devise de base
+    dividends_local: pd.DataFrame   # dividendes par action, en devise de cotation (sans effet change)
     currencies: dict[str, str]      # devise de cotation de chaque ticker (après GBp -> GBP)
     fx: dict[str, pd.Series]        # taux utilisés (base par unité de devise)
     dropped: dict[str, str] = field(default_factory=dict)
@@ -217,10 +285,12 @@ def load_market_data(
     prices, cleaning_dropped = clean_prices(prices)
     dropped.update(cleaning_dropped)
     dividends = dividends.reindex(index=prices.index, columns=prices.columns).fillna(0.0)
+    divs_local = divs_local.reindex(index=prices.index, columns=prices.columns).fillna(0.0)
 
     return MarketData(
         prices=prices,
         dividends=dividends,
+        dividends_local=divs_local,
         currencies={t: c for t, c in currencies.items() if t in prices.columns},
         fx=fx,
         dropped=dropped,
