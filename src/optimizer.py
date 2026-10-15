@@ -33,18 +33,31 @@ class InfeasibleError(RuntimeError):
 
 # --- Covariance --------------------------------------------------------------
 
-def shrunk_covariance(returns: pd.DataFrame) -> pd.DataFrame:
+def weekly_returns(prices: pd.DataFrame) -> pd.DataFrame:
+    """Rendements hebdomadaires (du vendredi au vendredi, dernier prix connu de la semaine).
+
+    Paris ferme à 17h30, New York à 22h : une nouvelle tombée l'après-midi touche
+    Paris le lendemain mais New York le jour même. En données journalières, les
+    corrélations Europe / US paraissent donc plus faibles qu'elles ne sont
+    (0,20 contre 0,26 en hebdomadaire sur la short-list) et l'optimiseur croit à
+    une diversification qui n'existe pas. Sur une semaine, ce décalage disparaît.
+    """
+    return prices.resample("W-FRI").last().pct_change(fill_method=None).iloc[1:]
+
+
+def shrunk_covariance(returns: pd.DataFrame, frequency: int = 52) -> pd.DataFrame:
     """Covariance annualisée, rétrécie vers une cible simple (Ledoit-Wolf).
 
-    Avec ~20 titres et quelques milliers de jours, la covariance brute contient
+    Avec ~20 titres et quelques centaines de semaines, la covariance brute contient
     du bruit que l'optimiseur exploite comme s'il était réel (corrélations
     faibles par hasard -> poids extrêmes). Le shrinkage tire les estimations vers
     une structure plus stable, ce qui rend les poids moins fragiles.
+    frequency : nombre de périodes par an (52 en hebdomadaire, 252 en journalier).
     """
     clean = returns.dropna()
     if len(clean) < 2 * returns.shape[1]:
-        raise ValueError("Pas assez de jours communs pour estimer la covariance.")
-    return CovarianceShrinkage(clean, returns_data=True).ledoit_wolf()
+        raise ValueError("Pas assez de périodes communes pour estimer la covariance.")
+    return CovarianceShrinkage(clean, returns_data=True, frequency=frequency).ledoit_wolf()
 
 
 # --- Niveau 1 : poids des actions à part d'actions fixée ----------------------
@@ -128,8 +141,7 @@ def optimize(prices: pd.DataFrame, meta: pd.DataFrame, policy: Policy) -> Optimi
     defensive = policy.defensive.ticker
     equity_tickers = [t for t in meta.index if meta.at[t, "pocket"] != DEFENSIVE]
     window_start = prices.index.max() - pd.DateOffset(years=policy.optimizer.covariance_years)
-    returns = prices.loc[window_start:, equity_tickers].pct_change(fill_method=None).iloc[1:]
-    cov = shrunk_covariance(returns)
+    cov = shrunk_covariance(weekly_returns(prices.loc[window_start:, equity_tickers]))
 
     step = policy.optimizer.equity_step
     lo, hi = 1.0 - policy.defensive.max_weight, 1.0

@@ -4,7 +4,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.optimizer import InfeasibleError, equity_weights, optimize, shrunk_covariance
+from src.optimizer import (
+    InfeasibleError, equity_weights, optimize, shrunk_covariance, weekly_returns,
+)
 from src.policy_check import check_allocation, check_limits
 from tests.conftest import with_cash
 
@@ -15,7 +17,7 @@ def test_equity_weights_respect_every_limit(policy, market):
     prices, meta = market
     pol = with_cash(policy)
     eq = list(meta.index[:8])
-    cov = shrunk_covariance(prices[eq].pct_change().dropna())
+    cov = shrunk_covariance(weekly_returns(prices[eq]))
     # 40 % d'actions : satellite = 8 % du total, possible avec 2 lignes à 5 % max
     w = equity_weights(cov, meta, pol, equity_share=0.4)
     assert w.sum() == pytest.approx(0.4)
@@ -29,7 +31,7 @@ def test_equity_weights_respect_every_limit(policy, market):
 def test_equity_weights_infeasible_when_caps_too_tight(policy, market):
     prices, meta = market
     eq = list(meta.index[:8])
-    cov = shrunk_covariance(prices[eq].pct_change().dropna())
+    cov = shrunk_covariance(weekly_returns(prices[eq]))
     # À 60 % d'actions, le satellite doit peser 12 % : 2 lignes à 5 % max ne suffisent pas
     with pytest.raises(InfeasibleError):
         equity_weights(cov, meta, with_cash(policy), equity_share=0.6)
@@ -37,7 +39,7 @@ def test_equity_weights_infeasible_when_caps_too_tight(policy, market):
 
 def test_shrunk_covariance_is_symmetric_positive(market):
     prices, _ = market
-    cov = shrunk_covariance(prices.iloc[:, :8].pct_change().dropna())
+    cov = shrunk_covariance(weekly_returns(prices.iloc[:, :8]))
     assert np.allclose(cov, cov.T)
     assert np.all(np.linalg.eigvalsh(cov) > 0)
 
@@ -94,3 +96,35 @@ def test_optimize_reports_failure_instead_of_hiding_it(policy, market):
     assert not res.accepted
     assert res.equity_share == pytest.approx(0.90)
     assert any(c.name == "stress crise_2008" for c in res.report.failed)
+
+
+
+def test_weekly_returns_compound_daily_returns():
+    idx = pd.bdate_range("2024-01-01", periods=10)          # lundi 1er au vendredi 12
+    prices = pd.DataFrame({"X": [100, 101, 102, 103, 110, 111, 112, 113, 114, 121.0]}, index=idx)
+    w = weekly_returns(prices)
+    assert w["X"].tolist() == pytest.approx([121 / 110 - 1])  # vendredi -> vendredi
+
+
+def test_weekly_returns_recover_correlation_hidden_by_time_zones():
+    # Le même choc touche l'Europe un jour après les US : corrélation journalière ~0,
+    # mais les deux bougent ensemble sur la semaine
+    idx = pd.bdate_range("2010-01-01", periods=2600)
+    shock = np.random.default_rng(9).normal(0, 0.01, len(idx))
+    us = pd.Series(shock, index=idx)
+    eu = us.shift(1).fillna(0)
+    prices = pd.DataFrame({"US": 100 * (1 + us).cumprod(), "EU": 100 * (1 + eu).cumprod()})
+    daily_corr = prices.pct_change().corr().loc["US", "EU"]
+    weekly_corr = weekly_returns(prices).corr().loc["US", "EU"]
+    assert abs(daily_corr) < 0.1
+    assert weekly_corr > 0.7
+
+
+def test_annualised_weekly_and_daily_covariances_agree_on_iid_data():
+    idx = pd.bdate_range("2000-01-01", periods=5000)
+    r = pd.DataFrame(np.random.default_rng(10).normal(0, 0.01, (5000, 2)), index=idx,
+                     columns=["A", "B"])
+    prices = 100 * (1 + r).cumprod()
+    daily = shrunk_covariance(prices.pct_change().dropna(), frequency=252)
+    weekly = shrunk_covariance(weekly_returns(prices), frequency=52)
+    assert weekly.loc["A", "A"] == pytest.approx(daily.loc["A", "A"], rel=0.1)
