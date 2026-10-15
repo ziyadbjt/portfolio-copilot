@@ -18,7 +18,7 @@ conda activate portfolio-copilot
 python scripts/run_screening.py       # propose une short-list (output/screening.xlsx)
 python scripts/run_screening.py --valider   # après relecture humaine
 python main.py                        # optimise et produit output/rapport.html + allocation.xlsx
-pytest                                # 92 tests
+pytest                                # 102 tests
 ```
 
 `main.py` est découpé en cellules `# %%` pour être exécuté bloc par bloc dans VS Code.
@@ -50,14 +50,14 @@ config/universe.csv ─► 271 titres (Euro Stoxx 50, FTSE 100, SMI, S&P 100)
 
 ### Exemple de résultat (octobre 2026, short-list proposée non validée)
 
-L'allocation retenue place **46 % en actions** (21 lignes) et **54 % en fonds monétaire EUR**.
+L'allocation retenue place **47 % en actions** (20 lignes) et **53 % en fonds monétaire EUR**.
 
 | Contrôle | Résultat | Limite |
 |---|---|---|
-| Stress test crise 2008 | -13,2 % | -20 % |
-| Stress test Covid mars 2020 | -18,5 % | -20 % |
-| Stress test inflation 2022 | -5,6 % | -20 % |
-| P(baisse > 20 %) sur 5 ans, Monte Carlo | 9,3 % | 10 % |
+| Stress test crise 2008 | -16,0 % | -20 % |
+| Stress test Covid mars 2020 | -18,7 % | -20 % |
+| Stress test inflation 2022 | -5,8 % | -20 % |
+| P(baisse > 20 %) sur 5 ans, Monte Carlo | 9,8 % | 10 % |
 
 Pour comparaison, la même sélection investie à 100 % en actions, en poids égaux, perdait 51 % en 2008 et 42 % en 2020.
 
@@ -118,14 +118,14 @@ La composition de quatre indices publics est lue sur Wikipedia (`scripts/build_u
 | **CVaR (Expected Shortfall)** | perte moyenne au-delà de la VaR. La VaR dit où commence la queue de distribution, la CVaR dit à quel point elle est profonde. |
 | VaR gaussienne | sert de comparaison : sur les données réelles, la VaR 99 % historique la dépasse, signe de queues épaisses |
 | Max drawdown | la mesure de la politique, calculée depuis le plus haut (capital initial compris) |
-| Stress tests | portefeuille actuel rejoué sur 2008, mars 2020 et 2022, avec la part du portefeuille couverte |
+| Stress tests | portefeuille actuel rejoué sur 2008, mars 2020 et 2022. Une action absente à l'époque est remplacée par les actions présentes de sa poche (jamais par le monétaire), et la part couverte est indiquée |
 | **Monte Carlo par bootstrap par blocs** | 10 000 trajectoires de 5 ans, construites avec des blocs d'un mois tirés de l'historique. Garde les krachs réels et la volatilité en grappes, contrairement à une loi normale. |
 | Contribution au risque | part de la variance due à chaque ligne : une ligne à 5 % du capital peut porter 8 % du risque |
 | Concentration | poids par secteur, pays et devise, nombre de lignes effectives (1/Σw²) |
 
 ### 5. Optimisation ([`src/optimizer.py`](src/optimizer.py))
 - **Poids des actions** : variance minimale sous toutes les contraintes de la politique. On n'utilise pas le ratio de Sharpe maximal : il exige des rendements attendus, très mal estimés à partir du passé, et l'optimiseur surpondérerait ce qui a le plus monté.
-- **Covariance Ledoit-Wolf** : avec ~20 titres, la covariance brute contient du bruit que l'optimiseur exploite. Le shrinkage stabilise les poids. Une régularisation L2 évite de tout concentrer sur 3 lignes.
+- **Covariance Ledoit-Wolf sur rendements hebdomadaires** : avec ~20 titres, la covariance brute contient du bruit que l'optimiseur exploite. Le shrinkage stabilise les poids. Les rendements sont hebdomadaires parce que Paris et New York ne ferment pas à la même heure : en journalier, la corrélation Europe/US paraît plus faible (0,20 contre 0,26), et l'optimiseur croirait à une diversification qui n'existe pas. Une régularisation L2 évite de tout concentrer sur 3 lignes.
 - **Part d'actions** : recherche par dichotomie de la plus grande part qui passe tous les contrôles. Le reste va au fonds monétaire. Si aucune part ne passe, le résultat est rendu « non conforme » : l'outil ne contourne pas une règle.
 
 ### 6. Contrôles et rapport ([`src/policy_check.py`](src/policy_check.py), [`src/report.py`](src/report.py))
@@ -139,9 +139,9 @@ Le texte est produit en deux temps. Le code extrait les chiffres et les constats
 ## Hypothèses et limites
 
 - **Le passé ne garantit rien.** Une crise d'une autre nature (taux, géopolitique, liquidité) peut faire pire que 2008, 2020 et 2022.
-- **Historique du Monte Carlo** : il commence à la cotation du titre le plus récent, en 2015 dans l'exemple, et ne contient alors pas 2008. Le stress test 2008 compense en partie, et le rapport le signale.
+- **Historique du Monte Carlo** : il commence à la cotation du titre le plus récent, en 2015 dans l'exemple, et ne contient alors pas 2008. Le rapport le signale et le stress test 2008 couvre ce cas. Vérifié pendant la review : avec un historique depuis 2007 (actions absentes remplacées dans leur poche), la probabilité estimée était légèrement plus basse (8,4 % contre 9,3 %), les années de rebond compensant le krach. Ce n'est donc pas une sous-estimation dans cet exemple, mais ça peut l'être avec une autre short-list.
 - **Rendement moyen** : la probabilité de drawdown y est très sensible, alors que c'est le paramètre le moins bien estimé. Pendant la mise au point des tests, un écart de 0,01 %/jour sur ce rendement a fait passer la probabilité estimée de 29 % à 45 %.
-- **Stress tests** : un titre non coté à l'époque est retiré et les autres poids sont remis à 100 %. La couverture est indiquée (87 % pour 2008 dans l'exemple).
+- **Stress tests** : un titre non coté à l'époque est remplacé par les autres actions de sa poche. La couverture est indiquée (86 % pour 2008 dans l'exemple).
 - **Fonds monétaire avant 2008** : il n'est coté que depuis janvier 2008. Avant, son rendement est supposé nul, ce qui est prudent.
 - **Rebalancement** : le portefeuille est supposé rebalancé chaque jour à poids constants, sans frais, impôts ni coûts de transaction.
 - **Données** : Yahoo Finance via yfinance, source non officielle qui peut changer sans préavis. Le payout ratio vient de Yahoo. L'univers dépend de la composition des indices telle que publiée sur Wikipedia.
@@ -152,7 +152,7 @@ Le texte est produit en deux temps. Le code extrait les chiffres et les constats
 
 ## Tests
 
-92 tests, sans réseau : yfinance est remplacé par des données simulées. Chaque mesure de risque est d'abord testée sur une série dont on connaît le résultat exact, par exemple :
+102 tests, sans réseau : yfinance est remplacé par des données simulées. Chaque mesure de risque est d'abord testée sur une série dont on connaît le résultat exact, par exemple :
 - 100 → 120 → 60 → 130 donne un max drawdown de 50 % ;
 - deux actifs indépendants à 50/50 ont une volatilité divisée par √2 ;
 - le bootstrap à blocs d'un jour est comparé à une simulation indépendante.
