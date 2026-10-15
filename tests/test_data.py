@@ -174,3 +174,12 @@ def test_retries_exhausted_becomes_data_error(monkeypatch):
 
     with pytest.raises(DataError, match="3 essais"):
         data._with_retries(always_down, "Historique X")
+
+
+def test_fill_before_listing_gives_zero_return():
+    idx = pd.bdate_range("2007-10-01", periods=5)
+    prices = pd.DataFrame({"CASH": [np.nan, np.nan, 100.0, 100.01, 100.02],
+                           "STOCK": [50.0, 49.0, 48.0, 47.0, 46.0]}, index=idx)
+    out = data.fill_before_listing(prices, "CASH")
+    assert out["CASH"].iloc[:3].tolist() == [100.0, 100.0, 100.0]
+    assert out["STOCK"].equals(prices["STOCK"])               # les actions ne sont pas touchées

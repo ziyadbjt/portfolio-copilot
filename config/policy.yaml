@@ -69,6 +69,12 @@ screening:
     volatility: 0.5              # plus bas = mieux
     market_cap: 0.5              # plus haut = mieux (titres plus établis et liquides)
 
+optimizer:                       # paramètres de méthode (pas des choix d'investissement)
+  history_start: 2007-01-01      # début de l'historique chargé (couvre la crise 2008)
+  covariance_years: 10           # fenêtre d'estimation de la matrice de covariance
+  l2_gamma: 0.1                  # régularisation : évite de tout concentrer sur 3 lignes
+  equity_step: 0.01              # précision de la recherche de la part d'actions
+
 exclusions:
   # Industries Yahoo Finance exclues (tabac, alcool, jeux d'argent)
   industries:

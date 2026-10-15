@@ -84,6 +84,14 @@ class Screening:
     satellite_score_weights: Mapping[str, float]
 
 
+@dataclass(frozen=True)
+class OptimizerSettings:
+    history_start: dt.date
+    covariance_years: int
+    l2_gamma: float
+    equity_step: float
+
+
 CORE_SCORE_CRITERIA = {"dividend_yield", "payout_ratio", "dividend_growth", "volatility"}
 SATELLITE_SCORE_CRITERIA = {"volatility", "market_cap"}
 
@@ -99,6 +107,7 @@ class Policy:
     risk: RiskRules
     core_style: CoreStyle
     screening: Screening
+    optimizer: OptimizerSettings
     excluded_industries: tuple[str, ...]
 
 
@@ -124,6 +133,7 @@ def parse_policy(raw: dict) -> Policy:
     style = _section(raw, "core_style")
     excl = _section(raw, "exclusions")
     scr = _section(raw, "screening")
+    opt = _section(raw, "optimizer")
 
     policy = Policy(
         base_currency=str(_get(raw, "base_currency")),
@@ -172,6 +182,12 @@ def parse_policy(raw: dict) -> Policy:
             satellite_score_weights=_weights(
                 scr, "satellite_score_weights", SATELLITE_SCORE_CRITERIA),
         ),
+        optimizer=OptimizerSettings(
+            history_start=_date(opt, "history_start", "optimizer"),
+            covariance_years=_positive_int(opt, "covariance_years"),
+            l2_gamma=_non_negative(opt, "l2_gamma"),
+            equity_step=_fraction(opt, "equity_step"),
+        ),
         excluded_industries=tuple(_get(excl, "industries")),
     )
     _check_consistency(policy)
@@ -202,6 +218,8 @@ def _check_consistency(p: Policy) -> None:
     themed = [i for industries in a.satellite_themes.values() for i in industries]
     if set(themed) & set(p.excluded_industries):
         raise PolicyError("Une industrie ne peut pas être à la fois satellite et exclue.")
+    if not 0 < p.optimizer.equity_step <= 0.1:
+        raise PolicyError("equity_step doit être entre 0 et 0.1 (ex. 0.01).")
     if p.defensive.max_weight >= 1:
         raise PolicyError("defensive.max_weight doit rester sous 1 (sinon aucune action).")
     if not 0.5 <= p.risk.var_confidence < 1:
@@ -237,6 +255,13 @@ def _positive_int(d: dict, key: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
         raise PolicyError(f"{key} doit être un entier positif, reçu {value!r}.")
     return value
+
+
+def _non_negative(d: dict, key: str) -> float:
+    value = _get(d, key)
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
+        raise PolicyError(f"{key} doit être un nombre positif ou nul, reçu {value!r}.")
+    return float(value)
 
 
 def _multiple(d: dict, key: str) -> float:
@@ -295,4 +320,4 @@ def _date(window: dict, key: str, scenario: str) -> dt.date:
     try:
         return dt.date.fromisoformat(str(value))
     except ValueError:
-        raise PolicyError(f"Scénario {scenario} : date {key} invalide ({value!r}).") from None
+        raise PolicyError(f"{scenario} : date {key} invalide ({value!r}).") from None

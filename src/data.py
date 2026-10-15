@@ -228,6 +228,19 @@ def clean_prices(
     return filled.drop(columns=list(dropped)), dropped
 
 
+def fill_before_listing(prices: pd.DataFrame, ticker: str) -> pd.DataFrame:
+    """Prix constant avant la première cotation de `ticker` (rendement nul).
+
+    Réservé au fonds monétaire de la poche défensive : avant son lancement,
+    on suppose qu'il ne rapporte rien. Hypothèse prudente (le monétaire rapportait
+    ~4 %/an en 2007) qui évite d'exclure la poche défensive du stress test 2008.
+    Ne jamais l'utiliser pour une action : ce serait inventer un historique.
+    """
+    out = prices.copy()
+    out[ticker] = out[ticker].bfill()
+    return out
+
+
 def find_suspicious_jumps(prices: pd.DataFrame, threshold: float = 0.5) -> pd.DataFrame:
     """Repère les variations journalières anormales (souvent des erreurs Yahoo).
 

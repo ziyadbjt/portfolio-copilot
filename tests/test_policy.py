@@ -138,3 +138,9 @@ def test_defensive_cannot_take_everything(raw):
     raw["defensive"]["max_weight"] = 1.0
     with pytest.raises(PolicyError, match="defensive.max_weight"):
         parse_policy(raw)
+
+
+def test_optimizer_settings_loaded():
+    o = load_policy().optimizer
+    assert o.history_start == dt.date(2007, 1, 1)
+    assert o.equity_step == 0.01

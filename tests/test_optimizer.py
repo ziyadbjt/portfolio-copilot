@@ -1,0 +1,140 @@
+"""Optimiseur et contrôles de politique sur un marché simulé au comportement connu."""
+
+import numpy as np
+import pandas as pd
+import pytest
+import yaml
+
+from src.optimizer import InfeasibleError, equity_weights, optimize, shrunk_covariance
+from src.policy import DEFAULT_POLICY_PATH, parse_policy
+from src.policy_check import check_allocation, check_limits
+
+
+@pytest.fixture
+def policy():
+    with DEFAULT_POLICY_PATH.open(encoding="utf-8") as f:
+        raw = yaml.safe_load(f)
+    raw["risk"]["mc_n_simulations"] = 400       # tests rapides
+    return parse_policy(raw)
+
+
+@pytest.fixture
+def market():
+    """2007-2024 : un facteur marché qui perd ~50 % pendant la fenêtre 2008, puis remonte.
+
+    8 actions (6 cœur, 2 satellite) + un monétaire sans risque.
+    """
+    idx = pd.bdate_range("2007-01-01", "2024-12-31")
+    rng = np.random.default_rng(0)
+    factor = rng.normal(0.0004, 0.008, len(idx))
+    crash = (idx >= "2007-10-09") & (idx <= "2009-03-09")
+    factor[crash] = np.log(0.5) / crash.sum()                  # -50 % réguliers
+    tickers = ["C1", "C2", "C3", "C4", "C5", "C6", "S1", "S2"]
+    betas = [0.8, 0.9, 1.0, 1.0, 1.1, 1.2, 1.4, 1.5]
+    prices = pd.DataFrame({
+        t: 100 * np.exp(np.cumsum(b * factor + rng.normal(0, 0.006, len(idx))))
+        for t, b in zip(tickers, betas)
+    }, index=idx)
+    prices["CASH"] = 100 * np.exp(np.cumsum(np.full(len(idx), 0.00005)))
+    meta = pd.DataFrame({
+        "pocket": ["coeur"] * 6 + ["satellite"] * 2 + ["defensif"],
+        "sector": ["Banks", "Banks", "Utilities", "Industrials", "Telecom", "Retail",
+                   "Technology", "Energy", None],
+        "country": ["France", "Germany", "France", "Spain", "United States", "Italy",
+                    "United States", "United Kingdom", None],
+        "currency": ["EUR", "EUR", "EUR", "EUR", "USD", "EUR", "USD", "GBP", "EUR"],
+    }, index=tickers + ["CASH"])
+    return prices, meta
+
+
+def with_cash(policy, ticker="CASH"):
+    """La politique réelle pointe sur XEON.DE : on la redirige vers le monétaire simulé."""
+    from dataclasses import replace
+    return replace(policy, defensive=replace(policy.defensive, ticker=ticker))
+
+
+# --- Niveau 1 : poids des actions --------------------------------------------
+
+def test_equity_weights_respect_every_limit(policy, market):
+    prices, meta = market
+    pol = with_cash(policy)
+    eq = list(meta.index[:8])
+    cov = shrunk_covariance(prices[eq].pct_change().dropna())
+    # 40 % d'actions : satellite = 8 % du total, possible avec 2 lignes à 5 % max
+    w = equity_weights(cov, meta, pol, equity_share=0.4)
+    assert w.sum() == pytest.approx(0.4)
+    assert w[meta.loc[eq, "pocket"] == "coeur"].sum() == pytest.approx(0.4 * 0.8, abs=1e-4)
+    assert w[meta.loc[eq, "pocket"] == "satellite"].sum() == pytest.approx(0.4 * 0.2, abs=1e-4)
+    full = pd.concat([w, pd.Series({"CASH": 0.6})])
+    failed = [c for c in check_limits(full, meta, pol) if not c.passed]
+    assert failed == []
+
+
+def test_equity_weights_infeasible_when_caps_too_tight(policy, market):
+    prices, meta = market
+    eq = list(meta.index[:8])
+    cov = shrunk_covariance(prices[eq].pct_change().dropna())
+    # À 60 % d'actions, le satellite doit peser 12 % : 2 lignes à 5 % max ne suffisent pas
+    with pytest.raises(InfeasibleError):
+        equity_weights(cov, meta, with_cash(policy), equity_share=0.6)
+
+
+def test_shrunk_covariance_is_symmetric_positive(market):
+    prices, _ = market
+    cov = shrunk_covariance(prices.iloc[:, :8].pct_change().dropna())
+    assert np.allclose(cov, cov.T)
+    assert np.all(np.linalg.eigvalsh(cov) > 0)
+
+
+# --- Contrôles de politique --------------------------------------------------
+
+def test_check_limits_flags_each_breach(policy, market):
+    _, meta = market
+    w = pd.Series({"C1": 0.30, "C2": 0.10, "S1": 0.10, "CASH": 0.50})
+    names = {c.name for c in check_limits(w, meta, with_cash(policy)) if not c.passed}
+    assert "ligne C1" in names                 # 30 % > 10 %
+    assert "ligne S1" in names                 # 10 % > 5 % (ligne satellite)
+    assert "secteur Banks" in names            # 40 % > 30 %
+
+
+def test_stress_check_rejects_full_equity(policy, market):
+    prices, meta = market
+    w = pd.Series(1 / 8, index=meta.index[:8])
+    w = pd.concat([w, pd.Series({"CASH": 0.0})])
+    report, details = check_allocation(w, meta, prices, with_cash(policy))
+    stress_2008 = next(c for c in report.checks if c.name == "stress crise_2008")
+    assert not stress_2008.passed
+    assert stress_2008.value > 0.45            # krach simulé de -50 %
+
+
+# --- Niveau 2 : part d'actions -----------------------------------------------
+
+def test_optimize_finds_largest_accepted_equity_share(policy, market):
+    prices, meta = market
+    pol = with_cash(policy)
+    res = optimize(prices, meta, pol)
+    assert res.accepted
+    stress = {c.name: c.value for c in res.report.checks if c.name.startswith("stress")}
+    assert max(stress.values()) <= 0.20 + 1e-6
+    # Un cran de plus d'actions doit échouer (sinon on n'a pas trouvé le maximum)
+    refused_above = [t for t in res.trials if t.equity_share > res.equity_share]
+    assert refused_above and not any(t.accepted for t in refused_above)
+    # Ordre de grandeur : krach de ~-50 % x beta moyen ~1 -> environ 35-45 % d'actions
+    assert 0.25 <= res.equity_share <= 0.50
+    assert res.weights.sum() == pytest.approx(1.0)
+    assert res.weights["CASH"] == pytest.approx(1 - res.equity_share)
+
+
+def test_optimize_reports_failure_instead_of_hiding_it(policy, market):
+    prices, meta = market
+    from dataclasses import replace
+    # Défensif plafonné à 10 % : au moins 90 % d'actions, intenable face au krach
+    pol = with_cash(policy)
+    pol = replace(pol, defensive=replace(pol.defensive, max_weight=0.10),
+                  limits=replace(pol.limits, max_line_weight=0.30, max_sector_weight=0.60,
+                                 max_country_weight=1.0, max_foreign_currency_weight=1.0,
+                                 max_satellite_line_weight=0.15))
+    res = optimize(prices, meta, pol)
+    assert not res.accepted
+    assert res.equity_share == pytest.approx(0.90)
+    assert any(c.name == "stress crise_2008" for c in res.report.failed)
