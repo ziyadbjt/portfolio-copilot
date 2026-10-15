@@ -126,3 +126,15 @@ def test_industry_cannot_be_satellite_and_excluded(raw):
     raw["allocation"]["satellite_themes"]["IA"].append("Tobacco")
     with pytest.raises(PolicyError, match="satellite et exclue"):
         parse_policy(raw)
+
+
+def test_defensive_pocket_loaded():
+    d = load_policy().defensive
+    assert d.ticker == "XEON.DE"
+    assert 0 < d.max_weight < 1
+
+
+def test_defensive_cannot_take_everything(raw):
+    raw["defensive"]["max_weight"] = 1.0
+    with pytest.raises(PolicyError, match="defensive.max_weight"):
+        parse_policy(raw)

@@ -18,8 +18,11 @@ Mots d'ordre :
 - Univers : actions Europe + US
 - Style du cœur : dividendes (entreprises stables, payout soutenable)
 - Exclusions sectorielles : tabac, alcool, jeux d'argent
-- Structure : cœur / satellite
-  - répartition de départ : 80 % cœur / 20 % satellite (paramétrable)
+- Structure : poche défensive + poche actions (cœur / satellite)
+  - poche défensive : fonds monétaire EUR (XEON.DE). Décidé à l'étape 4 : 100 % actions
+    donne -51 % en 2008 et -42 % en 2020, incompatible avec la limite de 20 %.
+    Le risque se pilote donc par la part d'actions, choisie par l'optimiseur.
+  - poche actions : 80 % cœur / 20 % satellite (paramétrable)
   - satellite : thématiques IA et énergie (exemples : Micron, Intel, TotalEnergies ; SK Hynix écartée car cotée en Corée, hors univers)
 - Limites à définir dans la config : poids max par ligne, par secteur, par pays, part max du satellite
 - Risque de change EUR/USD à suivre
@@ -59,7 +62,7 @@ Règle de conception : chaque fonction fait une seule chose, prend des entrées 
 - Concentration par ligne, secteur, pays
 - Contribution au risque de chaque ligne
 
-Une allocation est acceptée seulement si le drawdown en stress test reste sous 20 % et si la probabilité de dépasser 20 % en Monte Carlo reste sous un seuil configurable (10 % par défaut). Sinon, l'optimiseur réduit le satellite ou renforce le cœur. Ces mesures estiment un risque à partir du passé, elles ne garantissent rien : à écrire clairement dans le README.
+Une allocation est acceptée seulement si le drawdown en stress test reste sous 20 % et si la probabilité de dépasser 20 % en Monte Carlo reste sous un seuil configurable (10 % par défaut). Sinon, l'optimiseur augmente la poche défensive (et peut réduire le satellite). Ces mesures estiment un risque à partir du passé, elles ne garantissent rien : à écrire clairement dans le README.
 
 ## Plan de travail
 

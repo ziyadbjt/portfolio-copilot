@@ -23,7 +23,14 @@ class PolicyError(ValueError):
 
 
 @dataclass(frozen=True)
+class Defensive:
+    ticker: str
+    max_weight: float
+
+
+@dataclass(frozen=True)
 class Allocation:
+    """Répartition de la poche actions entre cœur et satellite."""
     core_target: float
     satellite_target: float
     satellite_max: float
@@ -86,6 +93,7 @@ class Policy:
     base_currency: str
     horizon_years: int
     universe_regions: tuple[str, ...]
+    defensive: Defensive
     allocation: Allocation
     limits: Limits
     risk: RiskRules
@@ -109,6 +117,7 @@ def parse_policy(raw: dict) -> Policy:
     if not isinstance(raw, dict):
         raise PolicyError("La politique doit être un dictionnaire YAML.")
 
+    defe = _section(raw, "defensive")
     alloc = _section(raw, "allocation")
     lim = _section(raw, "limits")
     risk = _section(raw, "risk")
@@ -120,6 +129,10 @@ def parse_policy(raw: dict) -> Policy:
         base_currency=str(_get(raw, "base_currency")),
         horizon_years=_positive_int(raw, "horizon_years"),
         universe_regions=tuple(_get(raw, "universe_regions")),
+        defensive=Defensive(
+            ticker=str(_get(defe, "ticker")),
+            max_weight=_fraction(defe, "max_weight"),
+        ),
         allocation=Allocation(
             core_target=_fraction(alloc, "core_target"),
             satellite_target=_fraction(alloc, "satellite_target"),
@@ -189,6 +202,8 @@ def _check_consistency(p: Policy) -> None:
     themed = [i for industries in a.satellite_themes.values() for i in industries]
     if set(themed) & set(p.excluded_industries):
         raise PolicyError("Une industrie ne peut pas être à la fois satellite et exclue.")
+    if p.defensive.max_weight >= 1:
+        raise PolicyError("defensive.max_weight doit rester sous 1 (sinon aucune action).")
     if not 0.5 <= p.risk.var_confidence < 1:
         raise PolicyError("var_confidence doit être entre 0.5 et 1 (ex. 0.95).")
 

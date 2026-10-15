@@ -6,7 +6,15 @@ base_currency: EUR
 horizon_years: 5
 universe_regions: [Europe, US]
 
-allocation:
+# Trois poches : défensive (monétaire) + actions (cœur + satellite).
+# Le risque se pilote par la part d'actions : l'optimiseur choisit la part défensive
+# nécessaire pour tenir la limite de drawdown en stress test et en Monte Carlo.
+defensive:
+  ticker: XEON.DE                # fonds monétaire EUR (taux €STR), coté depuis 2008
+  max_weight: 0.80               # proposition : au moins 20 % d'actions
+  # Avant sa cotation (fin 2007), rendement supposé nul : hypothèse prudente
+
+allocation:                      # répartition de la poche actions (pas du total)
   core_target: 0.80
   satellite_target: 0.20
   satellite_max: 0.25            # proposition : marge de 5 pts au-dessus de la cible
@@ -20,7 +28,7 @@ allocation:
       - Utilities - Renewable
       - Uranium
 
-limits:
+limits:                          # en part du portefeuille total
   max_line_weight: 0.10          # proposition : une ligne du cœur ne dépasse pas 10 %
   max_satellite_line_weight: 0.05  # proposition : une ligne satellite ne dépasse pas 5 %
   max_sector_weight: 0.30        # proposition
