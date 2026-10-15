@@ -11,6 +11,8 @@ dependencies:
   - pyarrow
   - openpyxl
   - jinja2
+  - requests
+  - lxml               # lecture des tableaux Wikipedia (scripts/build_universe.py)
   - pytest
   - ipykernel
   - pip
