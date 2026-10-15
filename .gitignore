@@ -16,3 +16,6 @@ __pycache__/
 # Système / éditeur
 .DS_Store
 .vscode/
+
+# Brief de travail local (non publié)
+CLAUDE.md
