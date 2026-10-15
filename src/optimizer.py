@@ -94,8 +94,20 @@ def equity_weights(
         ef.min_volatility()
     except OptimizationError as err:
         raise InfeasibleError(f"Pas de solution à {e:.0%} d'actions : {err}") from err
-    w = pd.Series(ef.clean_weights(cutoff=1e-4), dtype=float)
-    return w / w.sum() * e
+    return finalize_weights(ef.weights, [b[1] for b in bounds], e, tickers)
+
+
+def finalize_weights(raw, caps, equity_share: float, tickers: list[str]) -> pd.Series:
+    """Poids du solveur -> poids dans le portefeuille total, sans jamais dépasser un plafond.
+
+    Le solveur peut sortir de ses bornes de ~1e-9 : on y ramène chaque poids.
+    Les miettes (< 0,01 % des actions) sont mises à zéro. Pas de renormalisation :
+    elle repousserait une ligne plafonnée au-dessus de son plafond (bug corrigé :
+    0,1000010 pour un plafond de 0,10). L'écart d'arrondi va à la poche défensive.
+    """
+    w = np.clip(np.asarray(raw, dtype=float), 0.0, np.asarray(caps, dtype=float))
+    w[w < 1e-4] = 0.0
+    return pd.Series(w * equity_share, index=tickers)
 
 
 def full_allocation(equity: pd.Series, defensive_ticker: str) -> pd.Series:

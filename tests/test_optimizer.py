@@ -5,7 +5,8 @@ import pandas as pd
 import pytest
 
 from src.optimizer import (
-    InfeasibleError, equity_weights, optimize, shrunk_covariance, weekly_returns,
+    InfeasibleError, equity_weights, finalize_weights, optimize, shrunk_covariance,
+    weekly_returns,
 )
 from src.policy_check import check_allocation, check_limits
 from tests.conftest import with_cash
@@ -128,3 +129,21 @@ def test_annualised_weekly_and_daily_covariances_agree_on_iid_data():
     daily = shrunk_covariance(prices.pct_change().dropna(), frequency=252)
     weekly = shrunk_covariance(weekly_returns(prices), frequency=52)
     assert weekly.loc["A", "A"] == pytest.approx(daily.loc["A", "A"], rel=0.1)
+
+
+
+def test_finalize_weights_never_pushes_a_line_above_its_cap():
+    # 9 lignes au plafond (10 %) + des miettes que l'on supprime : la somme passe sous 1.
+    # Renormaliser à 1 pousserait chaque ligne au-dessus de 10 % (ancien bug).
+    raw = [0.1] * 9 + [0.00005] * 2 + [0.0999]
+    caps = [0.1] * 12
+    w = finalize_weights(raw, caps, equity_share=1.0, tickers=[f"T{i}" for i in range(12)])
+    assert (w <= 0.1).all()
+    assert w.sum() == pytest.approx(0.9999)            # le reste ira au monétaire
+    old = pd.Series(raw)[pd.Series(raw) >= 1e-4]
+    assert (old / old.sum()).max() > 0.1               # ce que faisait l'ancienne méthode
+
+
+def test_finalize_weights_clips_solver_overshoot():
+    w = finalize_weights([0.1000000004, 0.9], [0.1, 1.0], equity_share=0.5, tickers=["A", "B"])
+    assert w["A"] == pytest.approx(0.05) and w["A"] <= 0.05
