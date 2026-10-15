@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
 from src import report, risk  # noqa: E402
+from src.explain import explanation_facts, render_explanation  # noqa: E402
 from src.data import fill_before_listing, load_market_data  # noqa: E402
 from src.optimizer import optimize  # noqa: E402
 from src.policy import Policy, load_policy  # noqa: E402
@@ -88,6 +89,7 @@ def run() -> dict:
                           "signalées dans les données (à vérifier).")
 
     equity = result.weights[meta["pocket"].reindex(result.weights.index) != DEFENSIVE]
+    explanation = render_explanation(explanation_facts(result, analytics, policy, validated))
     return {
         "policy": policy,
         "result": result,
@@ -110,7 +112,7 @@ def run() -> dict:
                 result.weights, meta["currency"], policy.base_currency),
             "effective_lines": risk.effective_number_of_lines(equity / equity.sum()),
             "data_notes": data_notes,
-            "explanation": [],
+            "explanation": explanation,
         },
     }
 
@@ -127,6 +129,7 @@ def write_outputs(out: dict) -> None:
 if __name__ == "__main__":
     out = run()
     write_outputs(out)
+    print("\n" + "\n\n".join(out["context"]["explanation"]))
     failed = out["result"].report.failed
     if failed:
         print("Contrôles non respectés :", ", ".join(c.name for c in failed))

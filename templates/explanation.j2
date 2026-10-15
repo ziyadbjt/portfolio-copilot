@@ -1,0 +1,34 @@
+{% if accepted %}
+L'allocation proposée place {{ equity_share | pct }} du portefeuille en actions ({{ n_lines }} lignes : {{ core_share | pct }} dans le cœur, {{ satellite_share | pct }} dans le satellite) et {{ defensive_share | pct }} dans la poche défensive (fonds monétaire en {{ base_currency }}). Elle respecte toutes les règles de la politique.
+{% else %}
+Aucune allocation ne respecte toute la politique avec cette short-list. Même avec la part d'actions minimale autorisée ({{ min_equity | pct }}), les contrôles suivants échouent : {{ failed | join(", ") }}. Il faut revoir la short-list ou la politique : l'outil ne contourne pas une règle.
+{% endif %}
+
+{% if accepted and is_max_equity %}
+La part d'actions est au maximum : aucune limite de risque n'oblige à garder du monétaire.
+{% elif accepted and binding %}
+La part d'actions ne peut pas monter plus haut : un point de plus fait échouer {{ "le contrôle" if binding | length == 1 else "les contrôles" }} « {{ binding | join(" », « ") }} ». C'est cette règle qui fixe la taille de la poche défensive.
+{% endif %}
+
+Rejoué sur les crises passées, le pire épisode est {{ worst_scenario }}, avec une baisse de {{ worst_drawdown | pct(1) }} pour une limite de {{ max_dd_limit | pct }}.
+{% for scenario, coverage in low_coverage %}
+Pour {{ scenario }}, seuls {{ coverage | pct }} du portefeuille existaient déjà en Bourse : ce résultat est moins fiable.
+{% endfor %}
+
+Sur {{ mc.n_simulations }} trajectoires simulées de {{ mc.horizon_years }} ans, {{ mc.breach_probability | pct(1) }} dépassent une baisse de {{ max_dd_limit | pct }} (limite : {{ mc_limit | pct }}). La baisse maximale médiane est de {{ mc.median_max_drawdown | pct(1) }} ; dans 5 % des cas, elle dépasse {{ mc.p95_max_drawdown | pct(1) }}.
+{% if mc_misses_2008 %}
+Attention : l'historique de la simulation commence le {{ mc_start.strftime("%d/%m/%Y") }} (date de cotation du titre le plus récent) et ne contient donc pas la crise de 2008. Le stress test 2008 complète cette mesure.
+{% endif %}
+
+Depuis le {{ history_start.strftime("%d/%m/%Y") }}, par rapport à la même sélection investie à 100 % en actions, la volatilité passe de {{ vol_equity | pct(1) }} à {{ vol | pct(1) }} par an, et la pire baisse historique de {{ mdd_equity | pct(1) }} à {{ mdd | pct(1) }}.
+{% if var_99 > gaussian_var_99 %}
+Les jours de forte baisse sont plus fréquents que ne le prévoit une loi normale (VaR 99 % historique de {{ var_99 | pct(2) }} contre {{ gaussian_var_99 | pct(2) }} en gaussien) : c'est pourquoi le rapport s'appuie sur la CVaR et sur des données réelles plutôt que sur cette hypothèse.
+{% endif %}
+
+La plus grosse ligne est {{ top_line_name }} ({{ top_line }}, {{ top_line_weight | pct(1) }} du portefeuille). Le premier secteur est {{ top_sector }} ({{ top_sector_weight | pct(1) }}) et le premier pays {{ top_country }} ({{ top_country_weight | pct(1) }}). {{ heaviest_risk_name }} ({{ heaviest_risk }}) porte {{ heaviest_risk_contrib | pct(1) }} du risque des actions pour {{ heaviest_risk_weight | pct(1) }} de leur poids : c'est la ligne dont le risque dépasse le plus le poids.
+
+{% if not validated %}
+Cette allocation part de la short-list proposée par le screening, pas encore validée. Elle doit être relue avant toute décision.
+{% endif %}
+
+Ces chiffres estiment un risque à partir du passé et ne garantissent rien. L'outil ne passe aucun ordre : il propose, la décision reste humaine.
