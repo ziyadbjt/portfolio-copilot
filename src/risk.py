@@ -153,14 +153,53 @@ class StressResult:
     weight_covered: float      # part du portefeuille qui existait déjà à l'époque
 
 
+def redistribute_missing(
+    weights: pd.Series, available: pd.Index, groups: pd.Series | None = None
+) -> pd.Series:
+    """Remet à 100 % un portefeuille dont certains titres n'ont pas de données.
+
+    Le poids d'un titre absent va aux titres présents **du même groupe** (par
+    exemple la même poche), au prorata de leurs poids. Sans cela, le poids d'une
+    action absente irait en partie au monétaire et le portefeuille testé serait
+    plus prudent que le vrai. Si aucun titre du groupe n'est présent, son poids
+    est réparti sur tous les titres présents.
+    """
+    present = weights[weights.index.isin(available)]
+    if present.empty:
+        return present
+    if groups is None:
+        return present / present.sum()
+    g = groups.reindex(weights.index)
+    out = present.copy()
+    orphan = 0.0
+    for group, members in weights.groupby(g, dropna=False):
+        lost = members[~members.index.isin(available)].sum()
+        if lost == 0:
+            continue
+        kept = members[members.index.isin(available)]
+        if kept.sum() > 0:
+            out[kept.index] += lost * kept / kept.sum()
+        else:
+            orphan += lost
+    if orphan:
+        out += orphan * out / out.sum()
+    return out / out.sum()
+
+
 def stress_test(
-    prices: pd.DataFrame, weights: pd.Series, name: str, start: dt.date, end: dt.date
+    prices: pd.DataFrame,
+    weights: pd.Series,
+    name: str,
+    start: dt.date,
+    end: dt.date,
+    groups: pd.Series | None = None,
 ) -> StressResult:
     """Rejoue le portefeuille actuel sur une crise passée.
 
     Un titre sans historique à l'époque (introduit en Bourse plus tard) est retiré
-    et les poids restants sont remis à 100 %. weight_covered dit quelle part du
-    portefeuille le test couvre vraiment : sous ~80 %, le résultat est fragile.
+    et son poids redistribué dans son groupe (voir redistribute_missing).
+    weight_covered dit quelle part du portefeuille le test couvre vraiment :
+    sous ~80 %, le résultat est fragile.
     """
     weights = _check_weights(weights)
     window = prices.loc[pd.Timestamp(start):pd.Timestamp(end), weights.index]
@@ -168,8 +207,8 @@ def stress_test(
     covered = float(weights[available].sum())
     if covered == 0:
         return StressResult(name, start, end, np.nan, np.nan, 0.0)
-    w = weights[available] / covered
-    r = portfolio_returns(to_returns(window[available]), w)
+    w = redistribute_missing(weights, available, groups)
+    r = portfolio_returns(to_returns(window[w.index]), w)
     return StressResult(
         scenario=name, start=start, end=end,
         total_return=float((1 + r).prod() - 1),

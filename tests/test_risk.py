@@ -10,7 +10,8 @@ from scipy.stats import norm
 from src.risk import (
     annualized_volatility, drawdown_series, effective_number_of_lines,
     foreign_currency_weight, gaussian_var, historical_cvar, historical_var, max_drawdown,
-    monte_carlo_drawdown, portfolio_returns, risk_contributions, stress_test, to_returns,
+    monte_carlo_drawdown, portfolio_returns, redistribute_missing, risk_contributions,
+    stress_test, to_returns,
     weights_by_group,
 )
 
@@ -199,3 +200,44 @@ def test_monte_carlo_matches_independent_simulation():
     peak = np.maximum(np.maximum.accumulate(wealth, axis=1), 1.0)
     direct = ((1 - wealth / peak).max(axis=1) > 0.20).mean()
     assert boot.breach_probability == pytest.approx(direct, abs=0.03)
+
+
+
+# --- Titres absents pendant une crise ----------------------------------------
+
+def test_missing_stock_weight_stays_in_its_pocket():
+    w = pd.Series({"A": 0.2, "B": 0.2, "NEW": 0.1, "CASH": 0.5})
+    pockets = pd.Series({"A": "coeur", "B": "coeur", "NEW": "coeur", "CASH": "defensif"})
+    out = redistribute_missing(w, pd.Index(["A", "B", "CASH"]), pockets)
+    assert out["CASH"] == pytest.approx(0.5)                 # le monétaire ne grossit pas
+    assert out[["A", "B"]].tolist() == pytest.approx([0.25, 0.25])
+
+
+def test_without_groups_weight_is_spread_over_everything():
+    w = pd.Series({"A": 0.25, "NEW": 0.25, "CASH": 0.5})
+    out = redistribute_missing(w, pd.Index(["A", "CASH"]))
+    assert out["CASH"] == pytest.approx(2 / 3)
+
+
+def test_group_with_no_survivor_is_spread_over_all():
+    w = pd.Series({"A": 0.4, "SAT": 0.1, "CASH": 0.5})
+    pockets = pd.Series({"A": "coeur", "SAT": "satellite", "CASH": "defensif"})
+    out = redistribute_missing(w, pd.Index(["A", "CASH"]), pockets)
+    assert out.sum() == pytest.approx(1.0)
+    assert out["A"] / out["CASH"] == pytest.approx(0.4 / 0.5)
+
+
+def test_stress_test_keeps_cash_share_when_a_stock_is_missing():
+    # Krach de -40 % sur les actions ; NEW n'existe pas pendant la crise
+    idx = pd.bdate_range("2008-01-01", periods=60)
+    crash = np.linspace(100, 60, 60)
+    prices = pd.DataFrame({"OLD": crash, "NEW": np.nan, "CASH": 100.0}, index=idx)
+    w = pd.Series({"OLD": 0.25, "NEW": 0.25, "CASH": 0.5})
+    pockets = pd.Series({"OLD": "coeur", "NEW": "coeur", "CASH": "defensif"})
+    naive = stress_test(prices, w, "x", idx[0].date(), idx[-1].date())
+    fixed = stress_test(prices, w, "x", idx[0].date(), idx[-1].date(), groups=pockets)
+    # Rebalancé chaque jour à 50 % d'actions : perte = 1 - produit(1 + 0,5 x rendement action)
+    r = pd.Series(crash).pct_change().dropna()
+    assert fixed.max_drawdown == pytest.approx(1 - (1 + 0.5 * r).prod())
+    assert naive.max_drawdown < fixed.max_drawdown                     # l'ancienne méthode sous-estimait
+    assert fixed.weight_covered == pytest.approx(0.75)

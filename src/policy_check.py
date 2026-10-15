@@ -86,14 +86,22 @@ def check_limits(weights: pd.Series, meta: pd.DataFrame, policy: Policy) -> list
 # --- Limites de risque -------------------------------------------------------
 
 def check_risk(
-    weights: pd.Series, prices: pd.DataFrame, policy: Policy, seed: int = 42
+    weights: pd.Series,
+    prices: pd.DataFrame,
+    policy: Policy,
+    pockets: pd.Series | None = None,
+    seed: int = 42,
 ) -> tuple[list[Check], dict]:
-    """Stress tests et Monte Carlo. Renvoie aussi les résultats détaillés."""
+    """Stress tests et Monte Carlo. Renvoie aussi les résultats détaillés.
+
+    pockets : poche de chaque ticker. Dans un stress test, une action absente à
+    l'époque est remplacée par les actions présentes de sa poche, jamais par le monétaire.
+    """
     rules = policy.risk
     checks, details = [], {"stress": [], "monte_carlo": None}
 
     for s in rules.stress_scenarios:
-        res = risk.stress_test(prices, weights, s.name, s.start, s.end)
+        res = risk.stress_test(prices, weights, s.name, s.start, s.end, groups=pockets)
         details["stress"].append(res)
         checks.append(_at_most(
             f"stress {s.name}", res.max_drawdown, rules.max_drawdown,
@@ -117,5 +125,5 @@ def check_allocation(
     weights: pd.Series, meta: pd.DataFrame, prices: pd.DataFrame, policy: Policy
 ) -> tuple[PolicyReport, dict]:
     limit_checks = check_limits(weights, meta, policy)
-    risk_checks, details = check_risk(weights, prices, policy)
+    risk_checks, details = check_risk(weights, prices, policy, pockets=meta["pocket"])
     return PolicyReport(tuple(limit_checks + risk_checks)), details
