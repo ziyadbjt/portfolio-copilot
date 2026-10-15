@@ -158,13 +158,17 @@ def get_fundamentals(
     rows = {}
     for ticker in tickers:
         entry = cache.get(ticker)
-        if entry is None or (today - dt.date.fromisoformat(entry["fetched"])).days >= max_age_days:
+        stale = entry is None or "error" in entry or \
+            (today - dt.date.fromisoformat(entry["fetched"])).days >= max_age_days
+        if stale:
             try:
                 entry = {**_download_fundamentals(ticker), "fetched": today.isoformat()}
-            except Exception as e:  # yfinance lève des erreurs variées (HTTP, JSON...)
-                entry = {"error": str(e), "fetched": today.isoformat()}
-            cache[ticker] = entry
-            path.write_text(json.dumps(cache, indent=2, sort_keys=True), encoding="utf-8")
+                cache[ticker] = entry
+                path.write_text(json.dumps(cache, indent=2, sort_keys=True), encoding="utf-8")
+            except Exception:  # yfinance lève des erreurs variées (HTTP, JSON...)
+                # Pas de mise en cache : une coupure passagère ne doit pas masquer
+                # le titre pendant une semaine. Les champs restent vides pour ce run.
+                entry = {}
         rows[ticker] = {k: entry.get(k) for k in FUNDAMENTAL_FIELDS.values()}
 
     return pd.DataFrame.from_dict(rows, orient="index").rename_axis("ticker")

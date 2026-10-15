@@ -183,3 +183,25 @@ def test_fill_before_listing_gives_zero_return():
     out = data.fill_before_listing(prices, "CASH")
     assert out["CASH"].iloc[:3].tolist() == [100.0, 100.0, 100.0]
     assert out["STOCK"].equals(prices["STOCK"])               # les actions ne sont pas touchées
+
+
+
+def test_fundamentals_errors_are_not_cached(tmp_path, monkeypatch):
+    calls = []
+
+    def flaky(ticker):
+        calls.append(ticker)
+        if len(calls) == 1:
+            raise DataError("coupure réseau")
+        return {"name": "Total", "country": "France", "sector": "Energy",
+                "industry": "Oil & Gas Integrated", "payout_ratio": 0.5,
+                "market_cap": 1e11, "currency": "EUR"}
+
+    monkeypatch.setattr(data, "_download_fundamentals", flaky)
+    first = data.get_fundamentals(["TTE.PA"], tmp_path)
+    assert first.loc["TTE.PA"].isna().all()               # ce run : champs vides
+    second = data.get_fundamentals(["TTE.PA"], tmp_path)
+    assert second.loc["TTE.PA", "sector"] == "Energy"      # réessayé au run suivant
+    third = data.get_fundamentals(["TTE.PA"], tmp_path)
+    assert len(calls) == 2                                 # le succès, lui, est mis en cache
+    assert third.loc["TTE.PA", "sector"] == "Energy"
