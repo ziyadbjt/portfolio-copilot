@@ -257,8 +257,14 @@ def load_market_data(
     end: dt.date,
     base: str = "EUR",
     cache_dir: Path = DEFAULT_CACHE_DIR,
+    min_coverage: float = 0.9,
 ) -> MarketData:
-    """Prix et dividendes de `tickers` en devise de base, prêts pour le calcul de risque."""
+    """Prix et dividendes de `tickers` en devise de base, prêts pour le calcul de risque.
+
+    min_coverage : part minimale de la période couverte par un titre. Pour un
+    stress test sur 2008, mettre 0 : un titre coté plus tard est gardé et le
+    stress test indique la part du portefeuille qu'il couvre vraiment.
+    """
     closes, divs, currencies, dropped = {}, {}, {}, {}
     for ticker in tickers:
         try:
@@ -282,7 +288,7 @@ def load_market_data(
     prices = to_base_currency(prices_local, currencies, fx, base)
     dividends = to_base_currency(divs_local, currencies, fx, base)
 
-    prices, cleaning_dropped = clean_prices(prices)
+    prices, cleaning_dropped = clean_prices(prices, min_coverage=min_coverage)
     dropped.update(cleaning_dropped)
     dividends = dividends.reindex(index=prices.index, columns=prices.columns).fillna(0.0)
     divs_local = divs_local.reindex(index=prices.index, columns=prices.columns).fillna(0.0)
