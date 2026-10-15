@@ -191,15 +191,16 @@ class MonteCarloResult:
     horizon_years: int
 
 
-def monte_carlo_drawdown(
+def simulate_max_drawdowns(
     returns: pd.Series,
     horizon_years: int,
-    threshold: float,
     n_simulations: int = 10_000,
     block_size: int = 21,
     seed: int = 42,
-) -> MonteCarloResult:
+) -> tuple[np.ndarray, np.ndarray]:
     """Simule l'horizon par bootstrap par blocs des rendements historiques du portefeuille.
+
+    Renvoie (max drawdown de chaque scénario, valeur finale pour 1 investi).
 
     On tire au hasard des blocs de `block_size` jours consécutifs (~1 mois) dans
     l'historique et on les met bout à bout. Par rapport à une loi normale :
@@ -225,8 +226,19 @@ def monte_carlo_drawdown(
         peak = np.maximum(np.maximum.accumulate(wealth, axis=1), 1.0)
         max_dds.append((1 - wealth / peak).max(axis=1))
         finals.append(wealth[:, -1])
-    max_dd, final = np.concatenate(max_dds), np.concatenate(finals)
+    return np.concatenate(max_dds), np.concatenate(finals)
 
+
+def monte_carlo_drawdown(
+    returns: pd.Series,
+    horizon_years: int,
+    threshold: float,
+    n_simulations: int = 10_000,
+    block_size: int = 21,
+    seed: int = 42,
+) -> MonteCarloResult:
+    """Résumé de simulate_max_drawdowns : probabilité de dépasser `threshold`, quantiles."""
+    max_dd, final = simulate_max_drawdowns(returns, horizon_years, n_simulations, block_size, seed)
     return MonteCarloResult(
         breach_probability=float((max_dd > threshold).mean()),
         threshold=threshold,

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rapport d'allocation</title>
+<style>
+  :root {
+    --surface: #fcfcfb; --page: #f9f9f7; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+    --border: rgba(11,11,11,0.10); --good: #006300; --critical: #d03b3b; --accent: #2a78d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --surface: #1a1a19; --page: #0d0d0d; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+      --border: rgba(255,255,255,0.10); --good: #0ca30c; --critical: #e66767; --accent: #3987e5;
+    }
+  }
+  :root[data-theme="dark"] {
+    --surface: #1a1a19; --page: #0d0d0d; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --border: rgba(255,255,255,0.10); --good: #0ca30c; --critical: #e66767; --accent: #3987e5;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink);
+         font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 19px; margin: 40px 0 12px; }
+  h3 { font-size: 15px; margin: 20px 0 8px; }
+  .sub { color: var(--ink-2); margin: 0; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+          padding: 16px 20px; margin: 12px 0; }
+  .verdict { display: flex; gap: 12px; align-items: baseline; font-size: 17px; font-weight: 600; }
+  .ok { color: var(--good); } .ko { color: var(--critical); }
+  .warn { border-left: 4px solid var(--critical); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .tile .v { font-size: 24px; font-weight: 600; }
+  .tile .l { color: var(--ink-2); font-size: 13px; }
+  img { max-width: 100%; height: auto; display: block; border-radius: 8px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 700px) { .two { grid-template-columns: 1fr; } }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { color: var(--ink-2); font-weight: 600; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  ul { padding-left: 20px; } li { margin: 4px 0; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .explain p { margin: 8px 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Rapport d'allocation</h1>
+  <p class="sub">Généré le {{ generated_at }} · historique commun du {{ metrics.start | date }} au {{ metrics.end | date }} · devise {{ policy.base_currency }}</p>
+
+  {% if not shortlist_validated %}
+  <div class="card warn"><strong>Short-list non validée.</strong> Ce rapport utilise la proposition du screening
+    (output/shortlist_proposee.csv). Relire puis valider avec <code>scripts/run_screening.py --valider</code>.</div>
+  {% endif %}
+
+  <div class="card">
+    <div class="verdict">
+      {% if accepted %}<span class="ok">✓ Allocation conforme à la politique</span>
+      {% else %}<span class="ko">✗ Aucune allocation conforme trouvée</span>{% endif %}
+    </div>
+    <p class="muted">Outil en lecture seule : ceci est une proposition calculée à partir de règles et de données passées.
+      Aucun ordre n'est passé. Ce n'est pas un conseil en investissement.</p>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><div class="v">{{ equity_share | pct(0) }}</div><div class="l">part d'actions</div></div>
+    <div class="tile"><div class="v">{{ metrics.volatility | pct }}</div><div class="l">volatilité annuelle</div></div>
+    <div class="tile"><div class="v">-{{ worst_stress | pct }}</div><div class="l">pire stress test</div></div>
+    <div class="tile"><div class="v">{{ mc.breach_probability | pct }}</div><div class="l">P(drawdown &gt; {{ policy.risk.max_drawdown | pct(0) }}) sur {{ mc.horizon_years }} ans</div></div>
+  </div>
+
+  {% if explanation %}
+  <h2>Explication</h2>
+  <div class="card explain">
+    {% for paragraph in explanation %}<p>{{ paragraph }}</p>{% endfor %}
+  </div>
+  {% endif %}
+
+  <h2>Allocation</h2>
+  <div class="card"><img src="data:image/png;base64,{{ charts.pockets }}" alt="Répartition entre poches défensive, cœur et satellite"></div>
+  <div class="card"><img src="data:image/png;base64,{{ charts.weights }}" alt="Poids de chaque ligne d'actions"></div>
+  <div class="card scroll">
+    <table>
+      <tr><th>Ticker</th><th>Nom</th><th>Poche</th><th>Secteur</th><th>Pays</th><th>Devise</th><th>Poids</th><th>Part du risque</th></tr>
+      {% for t, row in weights.iterrows() %}
+      <tr><td>{{ t }}</td><td>{{ row['name'] }}</td><td>{{ row.pocket_label }}</td><td>{{ row.sector }}</td>
+          <td>{{ row.country }}</td><td>{{ row.currency }}</td><td class="n">{{ row.weight | pct }}</td>
+          <td class="n">{{ row.risk_contribution | pct }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <h2>Contrôles de la politique</h2>
+  <div class="card scroll">
+    <table>
+      <tr><th>Contrôle</th><th>Valeur</th><th>Limite</th><th>Verdict</th><th>Détail</th></tr>
+      {% for c in checks.itertuples() %}
+      <tr><td>{{ c.name }}</td><td class="n">{{ c.value | pct }}</td><td class="n">{{ c.limit | pct }}</td>
+          <td>{% if c.passed %}<span class="ok">✓ respecté</span>{% else %}<span class="ko">✗ dépassé</span>{% endif %}</td>
+          <td class="muted">{{ c.detail }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <h2>Crises passées (stress tests)</h2>
+  <p>Le portefeuille proposé, rejoué tel quel sur trois crises. Limite : -{{ policy.risk.max_drawdown | pct(0) }}.</p>
+  <div class="card"><img src="data:image/png;base64,{{ charts.stress }}" alt="Drawdown par scénario de crise"></div>
+
+  <h2>Simulation sur {{ mc.horizon_years }} ans (Monte Carlo)</h2>
+  <p>{{ mc.n_simulations }} trajectoires construites en rejouant des blocs d'un mois tirés de l'historique.
+    Drawdown médian : -{{ mc.median_max_drawdown | pct }} ; 5 % des scénarios font pire que -{{ mc.p95_max_drawdown | pct }}.</p>
+  <div class="card"><img src="data:image/png;base64,{{ charts.monte_carlo }}" alt="Distribution des drawdowns simulés"></div>
+  <p class="muted">Historique utilisé : du {{ mc_history[0] | date }} au {{ mc_history[1] | date }}
+    (commence à la cotation du titre le plus récent).</p>
+
+  <h2>Historique du portefeuille</h2>
+  <div class="card"><img src="data:image/png;base64,{{ charts.drawdown }}" alt="Drawdown historique"></div>
+  <div class="card"><img src="data:image/png;base64,{{ charts.wealth }}" alt="Valeur de 100 investis"></div>
+  <div class="card scroll">
+    <table>
+      <tr><th>Mesure</th><th>Portefeuille</th><th>Actions seules</th></tr>
+      <tr><td>Rendement annualisé</td><td class="n">{{ metrics.annual_return | pct }}</td><td class="n">{{ equity_only.annual_return | pct }}</td></tr>
+      <tr><td>Volatilité annuelle</td><td class="n">{{ metrics.volatility | pct }}</td><td class="n">{{ equity_only.volatility | pct }}</td></tr>
+      <tr><td>VaR {{ policy.risk.var_confidence | pct(0) }} (1 jour, historique)</td><td class="n">{{ metrics.var | pct(2) }}</td><td class="n">{{ equity_only.var | pct(2) }}</td></tr>
+      <tr><td>CVaR {{ policy.risk.var_confidence | pct(0) }} (1 jour)</td><td class="n">{{ metrics.cvar | pct(2) }}</td><td class="n">{{ equity_only.cvar | pct(2) }}</td></tr>
+      <tr><td>VaR 99 % historique / gaussienne</td><td class="n">{{ metrics.var_99 | pct(2) }} / {{ metrics.gaussian_var_99 | pct(2) }}</td><td class="n">{{ equity_only.var_99 | pct(2) }} / {{ equity_only.gaussian_var_99 | pct(2) }}</td></tr>
+      <tr><td>Max drawdown historique</td><td class="n">-{{ metrics.max_drawdown | pct }}</td><td class="n">-{{ equity_only.max_drawdown | pct }}</td></tr>
+    </table>
+  </div>
+
+  <h2>Concentration et risque</h2>
+  <div class="two">
+    <div class="card"><img src="data:image/png;base64,{{ charts.sectors }}" alt="Poids par secteur"></div>
+    <div class="card"><img src="data:image/png;base64,{{ charts.countries }}" alt="Poids par pays"></div>
+  </div>
+  <p>Part hors {{ policy.base_currency }} : {{ foreign_weight | pct }} · lignes effectives (actions) : {{ effective_lines | round(1) }}</p>
+  <h3>Part du capital et part du risque</h3>
+  <div class="card"><img src="data:image/png;base64,{{ charts.risk_vs_weight }}" alt="Part du capital et part du risque par ligne"></div>
+  <h3>Corrélations entre actions</h3>
+  <div class="card"><img src="data:image/png;base64,{{ charts.correlations }}" alt="Matrice de corrélations"></div>
+
+  <h2>Recherche de la part d'actions</h2>
+  <div class="card scroll">
+    <table>
+      <tr><th>Part d'actions testée</th><th>Verdict</th><th>Motif</th></tr>
+      {% for t in trials.itertuples() %}
+      <tr><td class="n">{{ t.equity_share | pct(0) }}</td>
+          <td>{% if t.accepted %}<span class="ok">✓</span>{% else %}<span class="ko">✗</span>{% endif %}</td>
+          <td class="muted">{{ t.reason }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <h2>Hypothèses et limites</h2>
+  <div class="card">
+    <ul>
+      <li>Toutes les mesures estiment un risque à partir du passé. Elles ne garantissent rien : une crise différente des précédentes peut faire pire.</li>
+      <li>Rendements totaux (dividendes réinvestis) en {{ policy.base_currency }} : le risque de change est inclus dans les chiffres.</li>
+      <li>Portefeuille rebalancé chaque jour à poids constants ; ni frais, ni impôts, ni coûts de transaction.</li>
+      <li>Avant sa cotation (début 2008), le fonds monétaire est supposé ne rien rapporter : hypothèse prudente.</li>
+      <li>Un titre qui n'était pas coté pendant une crise est retiré du stress test, les autres poids sont remis à 100 % ; la couverture est indiquée.</li>
+      <li>Le Monte Carlo ne rejoue que des situations présentes dans son historique ; s'il ne contient pas 2008, il sous-estime les krachs de ce type.</li>
+      <li>Données Yahoo Finance (non officielles), vérifiées automatiquement mais pas auditées.</li>
+    </ul>
+  </div>
+  {% if data_notes %}
+  <h3>Notes sur les données</h3>
+  <div class="card"><ul>{% for n in data_notes %}<li>{{ n }}</li>{% endfor %}</ul></div>
+  {% endif %}
+</main>
+</body>
+</html>
